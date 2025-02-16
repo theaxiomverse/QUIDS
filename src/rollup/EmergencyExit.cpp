@@ -173,7 +173,7 @@ quantum::QuantumState EmergencyExit::encode_state(uint64_t balance, uint64_t non
     quantum::QuantumState state(128);
     
     // Prepare quantum state in computational basis
-    state.prepare_state();
+    state.prepareState();
     
     // Encode balance bits
     for (size_t i = 0; i < 64; i++) {
@@ -182,7 +182,7 @@ quantum::QuantumState EmergencyExit::encode_state(uint64_t balance, uint64_t non
             Eigen::Matrix2cd x_gate;
             x_gate << 0, 1,
                      1, 0;
-            state.apply_single_qubit_gate(i, x_gate);
+            state.applySingleQubitGate(i, x_gate);
         }
     }
     
@@ -192,13 +192,13 @@ quantum::QuantumState EmergencyExit::encode_state(uint64_t balance, uint64_t non
             Eigen::Matrix2cd x_gate;
             x_gate << 0, 1,
                      1, 0;
-            state.apply_single_qubit_gate(i + 64, x_gate);
+            state.applySingleQubitGate(i + 64, x_gate);
         }
     }
     
     // Apply Hadamard gates to create superposition
     for (size_t i = 0; i < 128; i++) {
-        state.apply_hadamard(i);
+        state.applyHadamard(i);
     }
     
     // Create entanglement between balance and nonce qubits

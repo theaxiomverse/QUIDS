@@ -44,10 +44,23 @@ public:
     explicit QuantumState(const Eigen::VectorXcd& state_vector);
 
     /**
+     * @brief Copy constructor
+     * @param other State to copy from
+     */
+    QuantumState(const QuantumState& other);
+
+    /**
      * @brief Move constructor
      * @param other State to move from
      */
     QuantumState(QuantumState&& other) noexcept;
+
+    /**
+     * @brief Copy assignment operator
+     * @param other State to copy from
+     * @return Reference to this state
+     */
+    QuantumState& operator=(const QuantumState& other);
 
     /**
      * @brief Move assignment operator
@@ -188,7 +201,7 @@ public:
     /**
      * @brief Generates entanglement between qubits
      */
-    void generateEntanglement() const;
+    [[nodiscard]] Eigen::MatrixXcd generateEntanglement() const;
 
     /**
      * @brief Creates quantum circuit layers
@@ -214,13 +227,6 @@ public:
     void prepareState();
 
     /**
-     * @brief Equality comparison operator
-     * @param other State to compare with
-     * @return true if states are equal, false otherwise
-     */
-    [[nodiscard]] bool operator==(const QuantumState& other) const noexcept;
-
-    /**
      * @brief Encodes classical data into quantum state
      * @param features Vector of classical features to encode
      */
@@ -232,7 +238,14 @@ public:
      */
     [[nodiscard]] const std::vector<double>& getFeatures() const;
 
-private:
+    /**
+     * @brief Equality comparison operator
+     * @param other State to compare with
+     * @return true if states are equal, false otherwise
+     */
+    [[nodiscard]] bool operator==(const QuantumState& other) const noexcept;
+
+protected:
     /**
      * @brief Generates entanglement matrix for calculations
      */
@@ -254,6 +267,7 @@ private:
         const Eigen::MatrixXcd& gate, 
         std::size_t target_qubit) const;
 
+private:
     /// Implementation pointer
     std::unique_ptr<Impl> impl_;
 

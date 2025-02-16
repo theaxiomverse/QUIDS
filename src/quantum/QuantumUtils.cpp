@@ -32,8 +32,8 @@ double calculateFidelity(const QuantumState& state1, const QuantumState& state2)
     }
     
     // Calculate fidelity as |⟨ψ|φ⟩|²
-    const Eigen::VectorXcd& v1 = state1.get_state_vector();
-    const Eigen::VectorXcd& v2 = state2.get_state_vector();
+    const Eigen::VectorXcd& v1 = state1.getStateVector();
+    const Eigen::VectorXcd& v2 = state2.getStateVector();
     Complex overlap = v1.adjoint() * v2;
     return ::std::abs(overlap * ::std::conj(overlap));
 }
@@ -41,7 +41,7 @@ double calculateFidelity(const QuantumState& state1, const QuantumState& state2)
 double calculateEntanglement(const QuantumState& state) {
     const size_t dim = state.size();
     const size_t n_qubits = static_cast<size_t>(::std::log2(dim));
-    const Eigen::VectorXcd& state_vector = state.get_state_vector();
+    const Eigen::VectorXcd& state_vector = state.getStateVector();
     
     // Calculate reduced density matrix
     Eigen::MatrixXcd rho = Eigen::MatrixXcd::Zero(2, 2);
@@ -71,7 +71,7 @@ double calculateEntanglement(const QuantumState& state) {
 ErrorSyndrome detectErrors(const QuantumState& state) {
     ErrorSyndrome syndrome;
     const size_t n_qubits = static_cast<size_t>(::std::log2(state.size()));
-    const Eigen::VectorXcd& state_vector = state.get_state_vector();
+    const Eigen::VectorXcd& state_vector = state.getStateVector();
     
     // Simple error detection based on state amplitudes
     for (size_t i = 0; i < n_qubits; ++i) {
@@ -88,7 +88,7 @@ ErrorSyndrome detectErrors(const QuantumState& state) {
 }
 
 QuantumState correctErrors(const QuantumState& state, const ErrorSyndrome& syndrome) {
-    const Eigen::VectorXcd& state_vector = state.get_state_vector();
+    const Eigen::VectorXcd& state_vector = state.getStateVector();
     Eigen::VectorXcd corrected_vector = state_vector;
     const size_t dim = state.size();
     
@@ -116,7 +116,7 @@ double calculateQuantumSecurity(const QuantumState& state) {
     if (state.size() < 2) return 0.0;
     
     // Use SIMD for entropy calculation
-    const Eigen::VectorXcd& state_vector = state.get_state_vector();
+    const Eigen::VectorXcd& state_vector = state.getStateVector();
     double entropy = 0.0;
 
     #pragma omp parallel for simd reduction(+:entropy)

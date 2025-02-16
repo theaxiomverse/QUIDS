@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <cmath>
 #include <vector>
+#include <limits> // For std::numeric_limits
+#include <ostream> // For std::basic_ostream
 
 namespace quids {
 namespace quantum {
