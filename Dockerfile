@@ -24,7 +24,8 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libeigen3-dev \
     curl
-    && rm -rf /var/lib/apt/lists/*
+   
+RUN rm -rf /var/lib/apt/lists/*
 
 # Install Rust and Cargo
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y

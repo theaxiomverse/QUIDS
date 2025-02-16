@@ -3,12 +3,20 @@
 #include <memory>
 #include <vector>
 #include <array>
-#include "quantum/QuantumTypes.hpp"
-#include "quantum/QuantumCircuit.hpp"
-#include "neural/QuantumPolicyNetwork.hpp"
-#include "neural/QuantumValueNetwork.hpp"
+#include "../quantum/QuantumCircuit.hpp"
+#include "../quantum/QuantumState.hpp"
+#include "../neural/QuantumPolicyNetwork.hpp"
+#include "../neural/QuantumValueNetwork.hpp"
 
 namespace quids::rl {
+
+struct RLMetrics {
+    double averageReward;
+    double episodeLength;
+    double explorationRate;
+    double learningRate;
+    double discountFactor;
+};
 
 // Forward declarations
 struct State {
@@ -36,7 +44,7 @@ struct QuantumRLConfig {
     size_t batchSize;
     size_t replayBufferSize;
     double explorationRate;
-    quantum::QuantumCircuitConfig circuitConfig;
+    ::quids::quantum::QuantumCircuitConfig circuitConfig;
 };
 
 class QuantumRLAgent {
@@ -53,13 +61,13 @@ public:
     QuantumRLAgent& operator=(QuantumRLAgent&&) noexcept = default;
 
     // Core RL functions
-    Action decideActionQuantum(const quantum::QuantumState& state);
+    Action decideActionQuantum(const ::quids::quantum::QuantumState& state);
     void train(const std::vector<Experience>& experiences);
     void updateQuantumPolicy();
 
     // Configuration and metrics
     QuantumRLConfig getConfig() const;
-    const Metrics& getMetrics() const;
+    const RLMetrics& getMetrics() const;
     void setExplorationRate(double rate);
 
     // Metrics structure
@@ -73,11 +81,11 @@ public:
 
 private:
     // Neural networks
-    std::unique_ptr<neural::QuantumPolicyNetwork> policyNet_;
-    std::unique_ptr<neural::QuantumValueNetwork> valueNet_;
+    std::unique_ptr<::quids::neural::QuantumPolicyNetwork> policyNet_;
+    std::unique_ptr<::quids::neural::QuantumValueNetwork> valueNet_;
 
     // Quantum circuit for state preparation and measurement
-    std::unique_ptr<quantum::QuantumCircuit> circuit_;
+    std::unique_ptr<::quids::quantum::QuantumCircuit> circuit_;
 
     // Experience replay buffer (cache-aligned for SIMD)
     alignas(64) std::vector<Experience> replayBuffer_;
@@ -89,9 +97,9 @@ private:
     Metrics metrics_;
 
     // Internal helper functions
-    quantum::QuantumState prepareQuantumState(const State& classicalState);
-    Action measureQuantumState(const quantum::QuantumState& state);
-    double calculateQuantumAdvantage(const quantum::QuantumState& state, const Action& action);
+    ::quids::quantum::QuantumState prepareQuantumState(const State& classicalState);
+    Action measureQuantumState(const ::quids::quantum::QuantumState& state);
+    double calculateQuantumAdvantage(const ::quids::quantum::QuantumState& state, const Action& action);
     void updateReplayBuffer(const Experience& experience);
     void optimizePolicyQuantum();
     void optimizeValueQuantum();

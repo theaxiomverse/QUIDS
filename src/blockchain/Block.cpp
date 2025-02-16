@@ -1,30 +1,9 @@
 #include "blockchain/Block.hpp"
-#include <spdlog/spdlog.h>
-#include <openssl/sha.h>
+#include <algorithm>
 
-namespace quids {
-namespace blockchain {
+namespace quids::blockchain {
 
-bool Block::verify() const {
-    try {
-        // Verify block hash
-        if (hash.empty() || prev_hash.empty()) {
-            return false;
-        }
+// Non-virtual helper functions can go here
+// The pure virtual functions will be implemented by derived classes
 
-        // Verify transactions
-        for (const auto& tx : transactions) {
-            if (!tx.verify()) {
-                return false;
-            }
-        }
-
-        return true;
-    } catch (const std::exception& e) {
-        spdlog::error("Block verification failed: {}", e.what());
-        return false;
-    }
-}
-
-} // namespace blockchain
-} // namespace quids 
+} // namespace quids::blockchain 

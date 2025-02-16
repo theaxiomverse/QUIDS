@@ -1,26 +1,35 @@
-#pragma once
+#ifndef QUIDS_QUANTUM_QUANTUM_FORWARD_HPP
+#define QUIDS_QUANTUM_QUANTUM_FORWARD_HPP
 
-#include <Eigen/Dense>
-#include <complex>
+/**
+ * @file QuantumForward.hpp
+ * @brief Forward declarations for quantum computing module
+ * 
+ * This file contains forward declarations of classes, structs, and enums
+ * used throughout the quantum computing module. It helps break circular
+ * dependencies and reduces compilation time.
+ */
 
-namespace quids {
-namespace quantum {
+namespace quids::quantum {
 
-using Complex = std::complex<double>;
-using StateVector = Eigen::VectorXcd;
-using GateMatrix = Eigen::Matrix<Complex, Eigen::Dynamic, Eigen::Dynamic>;
-
-// Forward declarations
+// Forward declarations of classes
 class QuantumState;
 class QuantumCircuit;
+class QuantumRegister;
+class QuantumGate;
+class QuantumMeasurement;
 
 // Forward declarations of structs
 struct QuantumCircuitConfig;
-struct QuantumMeasurement;
 struct GateOperation;
+struct ErrorSyndrome;
+struct QuantumSecurityMetrics;
 
 // Forward declarations of enums
 enum class GateType;
+enum class ErrorCode;
+enum class Basis;
 
-} // namespace quantum
-} // namespace quids 
+} // namespace quids::quantum
+
+#endif // QUIDS_QUANTUM_QUANTUM_FORWARD_HPP 

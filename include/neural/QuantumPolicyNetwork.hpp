@@ -1,4 +1,5 @@
-#pragma once
+#ifndef QUIDS_NEURAL_QUANTUM_POLICY_NETWORK_HPP
+#define QUIDS_NEURAL_QUANTUM_POLICY_NETWORK_HPP
 
 #include "BaseQuantumNetwork.hpp"
 #include <vector>
@@ -16,13 +17,21 @@ namespace detail {
 
 class QuantumPolicyNetwork : public BaseQuantumNetwork {
 public:
-    QuantumPolicyNetwork(size_t stateSize, size_t actionSize, size_t numQubits);
+    QuantumPolicyNetwork(std::size_t stateSize, std::size_t actionSize, std::size_t numQubits);
     ~QuantumPolicyNetwork() override;
 
+    // Disable copy operations
+    QuantumPolicyNetwork(const QuantumPolicyNetwork&) = delete;
+    QuantumPolicyNetwork& operator=(const QuantumPolicyNetwork&) = delete;
+
+    // Enable move operations
+    QuantumPolicyNetwork(QuantumPolicyNetwork&&) noexcept = default;
+    QuantumPolicyNetwork& operator=(QuantumPolicyNetwork&&) noexcept = default;
+
     // Parameter access (from BaseQuantumNetwork)
-    double getParameter(size_t index) const override;
-    void setParameter(size_t index, double value) override;
-    size_t getNumParameters() const override;
+    double getParameter(std::size_t index) const override;
+    void setParameter(std::size_t index, double value) override;
+    std::size_t getNumParameters() const override;
 
     // Network operations (from BaseQuantumNetwork)
     void forward() override;
@@ -40,3 +49,5 @@ private:
 };
 
 } // namespace quids::neural 
+
+#endif // QUIDS_NEURAL_QUANTUM_POLICY_NETWORK_HPP 

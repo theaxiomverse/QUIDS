@@ -2,12 +2,13 @@
 #include "quantum/QuantumCircuit.hpp"
 #include <Eigen/Dense>
 #include <random>
+#include <stdexcept>
 
 namespace quids::neural {
 
 class QuantumValueNetwork::Impl {
 public:
-    Impl(size_t stateSize, size_t numQubits)
+    Impl(std::size_t stateSize, std::size_t numQubits)
         : stateSize_(stateSize),
           numQubits_(numQubits),
           parameters_(stateSize),
@@ -16,35 +17,35 @@ public:
         initializeParameters();
     }
 
-    void initializeParameters() {
+    void initializeParameters() noexcept {
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::normal_distribution<> d(0.0, 0.1);
+        std::normal_distribution<double> d(0.0, 0.1);
         
         for (auto& param : parameters_) {
             param = d(gen);
         }
     }
 
-    size_t stateSize_;
-    size_t numQubits_;
+    std::size_t stateSize_;
+    std::size_t numQubits_;
     std::vector<double> parameters_;
     std::vector<double> gradients_;
     double valueLoss_;
     quantum::QuantumState currentState_;
 };
 
-QuantumValueNetwork::QuantumValueNetwork(size_t stateSize, size_t numQubits)
+QuantumValueNetwork::QuantumValueNetwork(std::size_t stateSize, std::size_t numQubits)
     : impl_(std::make_unique<Impl>(stateSize, numQubits)) {}
 
-double QuantumValueNetwork::getParameter(size_t index) const {
+double QuantumValueNetwork::getParameter(std::size_t index) const {
     if (index >= impl_->parameters_.size()) {
         throw std::out_of_range("Parameter index out of range");
     }
     return impl_->parameters_[index];
 }
 
-void QuantumValueNetwork::setParameter(size_t index, double value) {
+void QuantumValueNetwork::setParameter(std::size_t index, double value) {
     if (index >= impl_->parameters_.size()) {
         throw std::out_of_range("Parameter index out of range");
     }

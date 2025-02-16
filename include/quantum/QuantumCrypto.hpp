@@ -15,17 +15,7 @@
 #include "QuantumState.hpp"
 #include "QuantumProof.hpp"
 
-
-/**
- * @file QuantumCrypto.hpp
- * @brief Quantum cryptography implementation for secure communication and signatures
- * @author QUIDS Team
- */
-
-
-
-namespace quids {
-namespace quantum {
+namespace quids::quantum {
 
 class QuantumKeyDistribution;
 
@@ -43,7 +33,7 @@ enum class SignatureScheme {
  */
 struct QuantumKey {
     std::vector<uint8_t> key_material;
-    quids::quantum::QuantumState entangled_state{1};  // Initialize with 1 qubit
+    QuantumState entangled_state{1};  // Initialize with 1 qubit
     double security_parameter{0.0};
     size_t effective_length{0};
 };
@@ -113,7 +103,7 @@ public:
      * @param params Parameters controlling the key generation process
      * @return Generated quantum key structure
      */
-        quids::quantum::QuantumKey generateKey(const quids::quantum::QuantumEncryptionParams& params);
+    quids::quantum::QuantumKey generateKey(const quids::quantum::QuantumEncryptionParams& params);
     
     /**
      * @brief Create a quantum-enhanced digital signature for given data
@@ -150,8 +140,8 @@ private:
     std::unique_ptr<Impl> impl_;
     
     // Internal helper functions
-   QuantumState prepareEncryptionState(const std::vector<uint8_t>& data);
-   QuantumMeasurement measureEncryptedState(const quids::quantum::QuantumState& state);
+    QuantumState prepareEncryptionState(const std::vector<uint8_t>& data);
+    QuantumMeasurement measureEncryptedState(const quids::quantum::QuantumState& state);
     bool validateQuantumParameters(const QuantumEncryptionParams& params) const;
     void updateSecurityMetrics(const quids::quantum::QuantumState& state);
     
@@ -159,7 +149,7 @@ private:
     static constexpr size_t MIN_KEY_SIZE = 256;
     static constexpr double MIN_SECURITY_THRESHOLD = 0.99;
     static constexpr size_t MAX_ROUNDS = 1000;
-
+}; // End of QuantumCrypto class
 
 // Helper functions for quantum cryptographic operations
 namespace utils {
@@ -176,7 +166,6 @@ namespace utils {
     // Security analysis
     double estimateQuantumSecurity(const quids::quantum::QuantumState& state);
     bool detectQuantumTampering(const quids::quantum::QuantumMeasurement& measurement);
-}
+} // namespace utils
 
-}; // namespace quantum
-} // namespace quids
+} // namespace quids::quantum

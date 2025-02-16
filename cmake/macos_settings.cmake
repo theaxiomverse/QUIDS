@@ -1,3 +1,7 @@
+# Set MacOS SDK version
+set(CMAKE_OSX_SYSROOT "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "15.3")
+
 # Find BLAKE3 manually
 find_path(BLAKE3_INCLUDE_DIR blake3.h
     PATHS /usr/local/include

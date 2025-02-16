@@ -1,55 +1,183 @@
-#pragma once
+#ifndef QUIDS_QUANTUM_QUANTUM_OPERATIONS_HPP
+#define QUIDS_QUANTUM_QUANTUM_OPERATIONS_HPP
 
-
-#include "quantum/QuantumState.hpp"
-
+#include "StdNamespace.hpp"
+#include "QuantumTypes.hpp"
+#include "QuantumState.hpp"
 #include <Eigen/Dense>
-#include "quantum/QuantumTypes.hpp"
+#include <complex>
 #include <vector>
-#include <cstdint>
 
-namespace quids {
-namespace quantum {
+namespace quids::quantum {
 
-class QuantumState;
+/**
+ * @brief Namespace containing quantum operations and gates
+ * 
+ * This namespace provides functions for creating and manipulating quantum
+ * gates and operations used in quantum computation. All gates are represented
+ * as unitary matrices operating on quantum states.
+ */
+namespace operations {
 
-// Apply a controlled quantum operation with arbitrary gate matrix
-void apply_controlled_operation(quids::quantum::QuantumState& state,
-                            size_t control,
-                            size_t target,
-                            const Eigen::Matrix2cd& operation);
+///@{
+/** @name Single-qubit Operations
+ * Functions for creating basic single-qubit quantum gates
+ */
 
-// Apply Toffoli gate (controlled-controlled-NOT)
-void apply_toffoli(quids::quantum::QuantumState& state,
-                 size_t control1,
-                 size_t control2,
-                 size_t target);
+/**
+ * @brief Creates Hadamard gate matrix
+ * @return 2x2 Hadamard gate matrix H = 1/√2 * [1  1]
+ *                                          [1 -1]
+ */
+[[nodiscard]] GateMatrix createHadamard() noexcept;
 
-// Apply SWAP gate between two qubits
-void apply_swap(quids::quantum::QuantumState& state,
-               size_t qubit1,
-               size_t qubit2);
+/**
+ * @brief Creates Pauli-X (NOT) gate matrix
+ * @return 2x2 Pauli-X gate matrix X = [0 1]
+ *                                     [1 0]
+ */
+[[nodiscard]] GateMatrix createPauliX() noexcept;
 
-} // namespace quantum
-} // namespace quids
+/**
+ * @brief Creates Pauli-Y gate matrix
+ * @return 2x2 Pauli-Y gate matrix Y = [0 -i]
+ *                                     [i  0]
+ */
+[[nodiscard]] GateMatrix createPauliY() noexcept;
 
+/**
+ * @brief Creates Pauli-Z gate matrix
+ * @return 2x2 Pauli-Z gate matrix Z = [1  0]
+ *                                     [0 -1]
+ */
+[[nodiscard]] GateMatrix createPauliZ() noexcept;
 
-namespace quids {
-namespace quantum {
-namespace detail {
+/**
+ * @brief Creates phase gate matrix
+ * @param angle Phase angle in radians
+ * @return 2x2 phase gate matrix P(θ) = [1 0   ]
+ *                                      [0 e^iθ]
+ */
+[[nodiscard]] GateMatrix createPhase(double angle) noexcept;
 
-// Convert classical bits to quantum state
-quids::quantum::QuantumState classical_to_quantum(const std::vector<uint8_t>& classical_data);
+/**
+ * @brief Creates rotation gate around X axis
+ * @param angle Rotation angle in radians
+ * @return 2x2 rotation matrix Rx(θ)
+ */
+[[nodiscard]] GateMatrix createRotationX(double angle) noexcept;
 
-// Calculate quantum state properties
-double calculate_entanglement(const quids::quantum::QuantumState& state);
-double calculate_coherence(const quids::quantum::QuantumState& state);
-double calculate_fidelity(const quids::quantum::QuantumState& state1, const quids::quantum::QuantumState& state2);
+/**
+ * @brief Creates rotation gate around Y axis
+ * @param angle Rotation angle in radians
+ * @return 2x2 rotation matrix Ry(θ)
+ */
+[[nodiscard]] GateMatrix createRotationY(double angle) noexcept;
 
-// Error correction utilities
-quids::quantum::QuantumState detect_errors(const quids::quantum::QuantumState& state);
-quids::quantum::QuantumState correct_errors(const quids::quantum::QuantumState& state, const quids::quantum::QuantumState& syndrome);
+/**
+ * @brief Creates rotation gate around Z axis
+ * @param angle Rotation angle in radians
+ * @return 2x2 rotation matrix Rz(θ)
+ */
+[[nodiscard]] GateMatrix createRotationZ(double angle) noexcept;
 
-} // namespace detail
-} // namespace quantum
-} // namespace quids 
+///@}
+
+///@{
+/** @name Multi-qubit Operations
+ * Functions for creating multi-qubit quantum gates
+ */
+
+/**
+ * @brief Creates CNOT (Controlled-NOT) gate matrix
+ * @return 4x4 CNOT gate matrix
+ */
+[[nodiscard]] OperatorMatrix createCNOT() noexcept;
+
+/**
+ * @brief Creates SWAP gate matrix
+ * @return 4x4 SWAP gate matrix
+ */
+[[nodiscard]] OperatorMatrix createSWAP() noexcept;
+
+/**
+ * @brief Creates Toffoli (CCNOT) gate matrix
+ * @return 8x8 Toffoli gate matrix
+ */
+[[nodiscard]] OperatorMatrix createToffoli() noexcept;
+
+/**
+ * @brief Creates controlled phase gate matrix
+ * @param angle Phase angle in radians
+ * @return 4x4 controlled phase gate matrix
+ */
+[[nodiscard]] OperatorMatrix createControlledPhase(double angle) noexcept;
+
+/**
+ * @brief Creates controlled-U gate from single-qubit gate
+ * @param u Single-qubit unitary to control
+ * @return 4x4 controlled-U gate matrix
+ */
+[[nodiscard]] OperatorMatrix createControlledU(const GateMatrix& u);
+
+///@}
+
+///@{
+/** @name Gate Operations
+ * Functions for manipulating and combining quantum gates
+ */
+
+/**
+ * @brief Tensor product of two gates
+ * @param a First gate
+ * @param b Second gate
+ * @return Combined gate matrix
+ */
+[[nodiscard]] OperatorMatrix tensorProduct(
+    const OperatorMatrix& a,
+    const OperatorMatrix& b);
+
+/**
+ * @brief Creates controlled version of a gate
+ * @param gate Gate to control
+ * @param numQubits Total number of qubits
+ * @param control Control qubit index
+ * @param target Target qubit index
+ * @return Controlled gate matrix
+ */
+[[nodiscard]] OperatorMatrix controlGate(
+    const OperatorMatrix& gate,
+    quids::size_t numQubits,
+    quids::size_t control,
+    quids::size_t target);
+
+/**
+ * @brief Applies a gate to a quantum state
+ * @param state State to modify
+ * @param gate Gate to apply
+ * @param target Target qubit index
+ */
+void applyGate(
+    QuantumState& state,
+    const GateMatrix& gate,
+    quids::size_t target);
+
+/**
+ * @brief Applies a controlled gate to a quantum state
+ * @param state State to modify
+ * @param gate Gate to apply
+ * @param control Control qubit index
+ * @param target Target qubit index
+ */
+void applyControlledGate(
+    QuantumState& state,
+    const GateMatrix& gate,
+    quids::size_t control,
+    quids::size_t target);
+
+///@}
+
+} // namespace operations
+} // namespace quids::quantum
+
+#endif // QUIDS_QUANTUM_QUANTUM_OPERATIONS_HPP 

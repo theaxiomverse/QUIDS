@@ -7,12 +7,13 @@
 #include <thread>
 #include <openssl/sha.h>
 #include <cstring>  // for memcpy
+#include <stdexcept>
 
 namespace quids::blockchain {
 
 class BlockProducer::Impl {
 public:
-    Impl(const BlockProducerConfig& config)
+    explicit Impl(const BlockProducerConfig& config)
         : config_(config),
           quantumNetwork_(std::make_unique<neural::QuantumPolicyNetwork>(256, 1, config.numQubits)) {
         metrics_.lastBlockTime = std::chrono::system_clock::now();
@@ -27,7 +28,7 @@ public:
 BlockProducer::BlockProducer(const BlockProducerConfig& config)
     : impl_(std::make_unique<Impl>(config)) {}
 
-AIBlock&& BlockProducer::produceBlock(const std::vector<Transaction>& transactions) {
+AIBlock BlockProducer::produceBlock(const std::vector<Transaction>& transactions) {
     if (!validateTransactions(transactions)) {
         throw std::invalid_argument("Invalid transactions");
     }
@@ -43,6 +44,7 @@ AIBlock&& BlockProducer::produceBlock(const std::vector<Transaction>& transactio
     aiConfig.numQubits = impl_->config_.numQubits;
     aiConfig.maxTransactionsPerBlock = impl_->config_.maxTransactionsPerBlock;
     aiConfig.targetBlockTime = impl_->config_.targetBlockTime;
+    
     AIBlock block(aiConfig);
     block.transactions = transactions;
     block.timestamp = std::chrono::duration_cast<std::chrono::seconds>(
@@ -81,28 +83,15 @@ AIBlock&& BlockProducer::produceBlock(const std::vector<Transaction>& transactio
     // Update metrics
     updateMetrics(block);
     
-    return std::move(block);
+    return block;
 }
 
-bool BlockProducer::verifyBlock(const AIBlock& block) const {
-    // Verify block hash
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    
-    auto blockData = block.serialize();
-    SHA256_Update(&sha256, blockData.data(), blockData.size());
-    SHA256_Final(hash, &sha256);
-    
-    // Check hash matches
-    if (!std::equal(hash, hash + SHA256_DIGEST_LENGTH, block.hash.begin())) {
+bool BlockProducer::verifyBlock(const AIBlock& block) const noexcept {
+    try {
+        return validateTransactions(block.transactions);
+    } catch (...) {
         return false;
     }
-    
-    // Verify difficulty
-    uint64_t hashValue;
-    std::copy_n(hash, sizeof(hashValue), reinterpret_cast<unsigned char*>(&hashValue));
-    return hashValue < (std::numeric_limits<uint64_t>::max() >> static_cast<int>(block.difficulty));
 }
 
 void BlockProducer::updateQuantumState(const quantum::QuantumState& networkState) {
@@ -124,7 +113,7 @@ BlockProducerConfig BlockProducer::getConfig() const {
     return impl_->config_;
 }
 
-const BlockProducer::Metrics& BlockProducer::getMetrics() const {
+const Metrics& BlockProducer::getMetrics() const noexcept {
     return impl_->metrics_;
 }
 

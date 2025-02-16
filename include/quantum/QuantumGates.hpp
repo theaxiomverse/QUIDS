@@ -1,121 +1,150 @@
-#ifndef QUANTUM_GATES_HPP
-#define QUANTUM_GATES_HPP
+#ifndef QUIDS_QUANTUM_QUANTUM_GATES_HPP
+#define QUIDS_QUANTUM_QUANTUM_GATES_HPP
 
+#include "StdNamespace.hpp"
+#include "QuantumTypes.hpp"
 #include <Eigen/Dense>
 #include <complex>
+#include <vector>
 #include <cmath>
-#include "quantum/QuantumTypes.hpp"
 
 namespace quids::quantum {
 
-using Complex = std::complex<double>;
-using GateMatrix = Eigen::MatrixXcd;
-
+/**
+ * @brief Quantum gate factory and manipulation utilities
+ * 
+ * This namespace contains functions for creating and manipulating quantum gates,
+ * including standard gates, controlled operations, and custom unitary matrices.
+ * All gates are represented as unitary matrices that preserve quantum state norms.
+ */
 namespace gates {
-    // Standard quantum gates
-    inline GateMatrix hadamard() {
-        return H;
-    }
 
-    inline GateMatrix phase(double angle) {
-        return Phase(angle);
-    }
+/**
+ * @brief Standard single-qubit gates
+ * 
+ * Pre-defined constant matrices for commonly used single-qubit quantum gates.
+ * These gates form a basis for quantum computation and are used as building
+ * blocks for more complex operations.
+ */
+namespace standard {
+    /// Hadamard gate: Creates superposition
+    static const GateMatrix H = (GateMatrix(2,2) << 
+        1/std::sqrt(2),  1/std::sqrt(2),
+        1/std::sqrt(2), -1/std::sqrt(2)).finished();
 
-    inline GateMatrix cnot() {
-        return CNOT;
-    }
+    /// Pauli-X gate: Quantum NOT operation
+    static const GateMatrix X = (GateMatrix(2,2) << 
+        0, 1,
+        1, 0).finished();
 
-    // Helper functions to create parameterized gates
-    inline GateMatrix Rx(double theta) {
-        const Complex i(0, 1);
-        const Complex c = cos(theta/2);
-        const Complex s = sin(theta/2);
-        GateMatrix matrix(2, 2);
-        matrix << c, -i*s,
-                 -i*s, c;
-        return matrix;
-    }
+    /// Pauli-Y gate: Complex rotation
+    static const GateMatrix Y = (GateMatrix(2,2) << 
+        0, Complex(0,-1),
+        Complex(0,1), 0).finished();
 
-    inline GateMatrix Ry(double theta) {
-        const Complex c = cos(theta/2);
-        const Complex s = sin(theta/2);
-        GateMatrix matrix(2, 2);
-        matrix << c, -s,
-                 s, c;
-        return matrix;
-    }
+    /// Pauli-Z gate: Phase flip
+    static const GateMatrix Z = (GateMatrix(2,2) << 
+        1,  0,
+        0, -1).finished();
 
-    inline GateMatrix Rz(double theta) {
-        const Complex i(0, 1);
-        const Complex phase = exp(-i * theta/2.0);
-        GateMatrix matrix(2, 2);
-        matrix << phase, 0,
-                 0, std::conj(phase);
-        return matrix;
-    }
+    /// S gate: √Z phase gate
+    static const GateMatrix S = (GateMatrix(2,2) << 
+        1, 0,
+        0, Complex(0,1)).finished();
 
-    inline GateMatrix Phase(double phi) {
-        Complex phase = std::polar(1.0, phi);
-        GateMatrix matrix(2, 2);
-        matrix << 1.0, 0.0,
-                 0.0, phase;
-        return matrix;
-    }
+    /// T gate: π/4 phase gate
+    static const GateMatrix T = (GateMatrix(2,2) << 
+        1, 0,
+        0, std::exp(Complex(0, M_PI/4))).finished();
+} // namespace standard
 
-    // Constant gates
-    const GateMatrix H = []() {
-        GateMatrix matrix(2, 2);
-        double invSqrt2 = 1.0 / std::sqrt(2.0);
-        matrix << invSqrt2, invSqrt2,
-                 invSqrt2, -invSqrt2;
-        return matrix;
-    }();
+/**
+ * @brief Creates a rotation gate around specified axis
+ * @param axis Axis of rotation (0=X, 1=Y, 2=Z)
+ * @param angle Rotation angle in radians
+ * @return 2x2 rotation gate matrix
+ * @throws std::invalid_argument if axis is invalid
+ */
+[[nodiscard]] GateMatrix createRotation(std::size_t axis, double angle);
 
-    const GateMatrix X = []() {
-        GateMatrix matrix(2, 2);
-        matrix << 0.0, 1.0,
-                 1.0, 0.0;
-        return matrix;
-    }();
+/**
+ * @brief Creates an arbitrary single-qubit unitary gate
+ * @param theta First Euler angle
+ * @param phi Second Euler angle
+ * @param lambda Third Euler angle
+ * @return 2x2 unitary gate matrix
+ */
+[[nodiscard]] GateMatrix createUnitary(double theta, double phi, double lambda) noexcept;
 
-    const GateMatrix Y = []() {
-        GateMatrix matrix(2, 2);
-        matrix << 0.0, -Complex(0.0, 1.0),
-                 Complex(0.0, 1.0), 0.0;
-        return matrix;
-    }();
+/**
+ * @brief Creates a controlled version of a single-qubit gate
+ * @param gate Single-qubit gate to control
+ * @return 4x4 controlled gate matrix
+ */
+[[nodiscard]] OperatorMatrix createControlled(const GateMatrix& gate) noexcept;
 
-    const GateMatrix Z = []() {
-        GateMatrix matrix(2, 2);
-        matrix << 1.0, 0.0,
-                 0.0, -1.0;
-        return matrix;
-    }();
+/**
+ * @brief Creates a tensor product of multiple gates
+ * @param gates Vector of gate matrices to combine
+ * @return Combined gate matrix
+ */
+[[nodiscard]] OperatorMatrix tensorProduct(const std::vector<GateMatrix>& gates);
 
-    const GateMatrix S = []() {
-        GateMatrix matrix(2, 2);
-        matrix << 1.0, 0.0,
-                 0.0, Complex(0.0, 1.0);
-        return matrix;
-    }();
+/**
+ * @brief Checks if a matrix represents a valid quantum gate
+ * @param matrix Matrix to check
+ * @param tolerance Maximum allowed deviation from unitarity
+ * @return true if matrix is unitary within tolerance
+ */
+[[nodiscard]] bool isValidGate(
+    const OperatorMatrix& matrix,
+    double tolerance = constants::QUANTUM_ERROR_THRESHOLD) noexcept;
 
-    const GateMatrix T = []() {
-        GateMatrix matrix(2, 2);
-        matrix << 1.0, 0.0,
-                 0.0, std::exp(Complex(0.0, M_PI/4.0));
-        return matrix;
-    }();
+/**
+ * @brief Decomposes a unitary matrix into basic gates
+ * @param unitary Unitary matrix to decompose
+ * @return Vector of basic gates that approximate the unitary
+ * @throws std::invalid_argument if matrix is not unitary
+ */
+[[nodiscard]] std::vector<GateOperation> decomposeUnitary(const OperatorMatrix& unitary);
 
-    const GateMatrix CNOT = []() {
-        GateMatrix matrix(4, 4);
-        matrix << 1.0, 0.0, 0.0, 0.0,
-                 0.0, 1.0, 0.0, 0.0,
-                 0.0, 0.0, 0.0, 1.0,
-                 0.0, 0.0, 1.0, 0.0;
-        return matrix;
-    }();
+/**
+ * @brief Optimizes a sequence of quantum gates
+ * @param gates Vector of gate operations
+ * @return Optimized sequence of gates
+ */
+[[nodiscard]] std::vector<GateOperation> optimizeSequence(
+    const std::vector<GateOperation>& gates);
+
+/**
+ * @brief Calculates the fidelity between two quantum gates
+ * @param gate1 First gate matrix
+ * @param gate2 Second gate matrix
+ * @return Fidelity between gates (0 to 1)
+ */
+[[nodiscard]] double calculateFidelity(
+    const OperatorMatrix& gate1,
+    const OperatorMatrix& gate2) noexcept;
+
+namespace detail {
+    /**
+     * @brief Helper function to create tensor product of matrices
+     * @param matrices Vector of matrices to combine
+     * @return Tensor product result
+     */
+    [[nodiscard]] OperatorMatrix tensorProduct(
+        const std::vector<OperatorMatrix>& matrices) noexcept;
+
+    /**
+     * @brief Helper function to create controlled version of a matrix
+     * @param matrix Matrix to control
+     * @return Controlled version of input matrix
+     */
+    [[nodiscard]] OperatorMatrix makeControlled(
+        const OperatorMatrix& matrix) noexcept;
+} // namespace detail
 
 } // namespace gates
 } // namespace quids::quantum
 
-#endif // QUANTUM_GATES_HPP
+#endif // QUIDS_QUANTUM_QUANTUM_GATES_HPP

@@ -1,4 +1,5 @@
 #include "blockchain/AddressManager.hpp"
+#include "../include/blockchain/Address.hpp"
 #include <blake3.h>
 #include <sstream>
 #include <iomanip>
@@ -11,8 +12,7 @@
 #include <chrono>
 #include <algorithm>
 
-namespace quids {
-namespace blockchain {
+namespace quids::blockchain {
 
 struct AddressManager::Impl {
     std::unordered_map<std::string, Account> accounts;
@@ -573,5 +573,8 @@ std::optional<AddressManager::AddressComponents> AddressManager::decodeAddress(
     return components;
 }
 
-} // namespace blockchain
-} // namespace quids 
+void AddressManager::setQuantumState(const Address& address, ::quids::quantum::QuantumState state) {
+    impl_->quantum_states[address] = std::move(state);
+}
+
+} // namespace quids::blockchain 

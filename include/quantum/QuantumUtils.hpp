@@ -1,93 +1,222 @@
-#pragma once
+#ifndef QUIDS_QUANTUM_QUANTUM_UTILS_HPP
+#define QUIDS_QUANTUM_QUANTUM_UTILS_HPP
 
-#include "quantum/QuantumTypes.hpp"
-#include "quantum/QuantumState.hpp"
+#include "QuantumTypes.hpp"
+#include "QuantumState.hpp"
 #include <Eigen/Dense>
 #include <vector>
 #include <complex>
-#include <utility>
-#include "quantum/QuantumProof.hpp"
+#include <optional>
+#include <random>
+#include <cmath>
 
 namespace quids::quantum {
+
+/**
+ * @brief Utility functions for quantum computation
+ * 
+ * This namespace contains helper functions for quantum state manipulation,
+ * measurement, and analysis that are used across the quantum computing module.
+ */
 namespace utils {
 
-    // Use fully qualified types
-    quids::quantum::QuantumState tensor_product(
-        const quids::quantum::QuantumState& a, 
-        const quids::quantum::QuantumState& b
-    );
+/**
+ * @brief Creates tensor product of two quantum states
+ * @param a First quantum state
+ * @param b Second quantum state
+ * @return Combined quantum state
+ */
+[[nodiscard]] QuantumState tensorProduct(
+    const QuantumState& a, 
+    const QuantumState& b);
 
-    quids::quantum::QuantumState partial_trace(
-        const quids::quantum::QuantumState& state, 
-        size_t qubit_index, 
-        size_t num_qubits
-    );
+/**
+ * @brief Performs partial trace over specified qubit
+ * @param state Input quantum state
+ * @param qubit_index Qubit to trace out
+ * @param num_qubits Total number of qubits
+ * @return Reduced quantum state
+ */
+[[nodiscard]] QuantumState partialTrace(
+    const QuantumState& state, 
+    std::size_t qubit_index, 
+    std::size_t num_qubits);
 
-    std::pair<size_t, double> measure_qubit(
-        quids::quantum::QuantumState& state, 
-        size_t qubit_index
-    );
+/**
+ * @brief Measures a single qubit in computational basis
+ * @param state Quantum state to measure (modified by measurement)
+ * @param qubit_index Qubit to measure
+ * @return Pair of (measurement outcome, probability)
+ */
+[[nodiscard]] std::pair<std::size_t, double> measureQubit(
+    QuantumState& state, 
+    std::size_t qubit_index);
 
-    std::vector<double> get_measurement_probabilities(
-        const quids::quantum::QuantumState& state
-    );
+/**
+ * @brief Gets measurement probabilities for all basis states
+ * @param state Quantum state to analyze
+ * @return Vector of measurement probabilities
+ */
+[[nodiscard]] std::vector<double> getMeasurementProbabilities(
+    const QuantumState& state);
 
-    // State preparation functions
-    quids::quantum::QuantumState create_bell_pair();
-    quids::quantum::QuantumState create_ghz_state(size_t num_qubits);
-    quids::quantum::QuantumState create_w_state(size_t num_qubits);
+// State preparation functions
+/**
+ * @brief Creates a Bell state (maximally entangled two-qubit state)
+ * @return Bell state |Φ⁺⟩ = (|00⟩ + |11⟩)/√2
+ */
+[[nodiscard]] QuantumState createBellPair();
 
-    // Error correction
-    quids::quantum::QuantumState apply_error_correction(
-        const quids::quantum::QuantumState& state, 
-        const quids::quantum::ErrorSyndrome& syndrome
-    );
+/**
+ * @brief Creates a GHZ state
+ * @param num_qubits Number of qubits in state
+ * @return GHZ state (|00...0⟩ + |11...1⟩)/√2
+ */
+[[nodiscard]] QuantumState createGHZState(std::size_t num_qubits);
 
-    quids::quantum::ErrorSyndrome detect_errors(
-        const quids::quantum::QuantumState& state
-    );
+/**
+ * @brief Creates a W state
+ * @param num_qubits Number of qubits in state
+ * @return W state (|100...0⟩ + |010...0⟩ + ... + |000...1⟩)/√n
+ */
+[[nodiscard]] QuantumState createWState(std::size_t num_qubits);
 
-    // Quantum state metrics
-    double calculate_fidelity(
-        const quids::quantum::QuantumState& state1, 
-        const quids::quantum::QuantumState& state2
-    );
+// Error correction
+/**
+ * @brief Applies error correction to quantum state
+ * @param state State with errors
+ * @param syndrome Error syndrome
+ * @return Corrected quantum state
+ */
+[[nodiscard]] QuantumState applyErrorCorrection(
+    const QuantumState& state, 
+    const ErrorSyndrome& syndrome);
 
-    double calculate_trace_distance(
-        const quids::quantum::QuantumState& state1, 
-        const quids::quantum::QuantumState& state2
-    );
+/**
+ * @brief Detects errors in quantum state
+ * @param state State to check for errors
+ * @return Error syndrome containing error information
+ */
+[[nodiscard]] ErrorSyndrome detectErrors(const QuantumState& state);
 
-    // Quantum metrics
-    double calculate_von_neumann_entropy(const quids::quantum::QuantumState& state);
-    
-    // Gate operations
-    quids::quantum::GateMatrix create_controlled_gate(const quids::quantum::GateMatrix& gate);
-    quids::quantum::GateMatrix create_toffoli_gate();
-    quids::quantum::GateMatrix create_swap_gate();
-    
-    // Helper functions
-    size_t get_state_dimension(size_t num_qubits);
-    std::vector<size_t> get_computational_basis_states(size_t num_qubits);
-    bool is_unitary(const quids::quantum::GateMatrix& gate);
-    
-    // SIMD-optimized operations
-    namespace simd {
-        void apply_single_qubit_gate(quids::quantum::StateVector& state, const quids::quantum::GateMatrix& gate, size_t qubit_index);
-        void apply_two_qubit_gate(quids::quantum::StateVector& state, const quids::quantum::GateMatrix& gate, size_t qubit1, size_t qubit2);
-        void apply_controlled_gate(quids::quantum::StateVector& state, const quids::quantum::GateMatrix& gate, size_t control, size_t target);
-    }
-}
+// Quantum state metrics
+/**
+ * @brief Calculates fidelity between two states
+ * @param state1 First state
+ * @param state2 Second state
+ * @return Fidelity value between 0 and 1
+ */
+[[nodiscard]] double calculateFidelity(
+    const QuantumState& state1, 
+    const QuantumState& state2) noexcept;
+
+/**
+ * @brief Calculates trace distance between states
+ * @param state1 First state
+ * @param state2 Second state
+ * @return Trace distance value between 0 and 1
+ */
+[[nodiscard]] double calculateTraceDistance(
+    const QuantumState& state1, 
+    const QuantumState& state2) noexcept;
+
+/**
+ * @brief Calculates von Neumann entropy
+ * @param state Input quantum state
+ * @return Entropy value
+ */
+[[nodiscard]] double calculateVonNeumannEntropy(const QuantumState& state) noexcept;
+
+// Helper functions
+/**
+ * @brief Gets dimension of state space
+ * @param num_qubits Number of qubits
+ * @return Dimension (2^n for n qubits)
+ */
+[[nodiscard]] std::size_t getStateDimension(std::size_t num_qubits) noexcept;
+
+/**
+ * @brief Gets computational basis state indices
+ * @param num_qubits Number of qubits
+ * @return Vector of basis state indices
+ */
+[[nodiscard]] std::vector<std::size_t> getComputationalBasisStates(
+    std::size_t num_qubits);
+
+/**
+ * @brief Checks if matrix is unitary
+ * @param matrix Matrix to check
+ * @return true if matrix is unitary
+ */
+[[nodiscard]] bool isUnitary(const OperatorMatrix& matrix) noexcept;
+
+// SIMD-optimized operations
+namespace simd {
+    /**
+     * @brief Applies single-qubit gate using SIMD
+     * @param state State vector to modify
+     * @param gate Gate matrix to apply
+     * @param qubit_index Target qubit
+     */
+    void applySingleQubitGate(
+        StateVector& state,
+        const OperatorMatrix& gate,
+        std::size_t qubit_index);
+
+    /**
+     * @brief Applies two-qubit gate using SIMD
+     * @param state State vector to modify
+     * @param gate Gate matrix to apply
+     * @param qubit1 First qubit
+     * @param qubit2 Second qubit
+     */
+    void applyTwoQubitGate(
+        StateVector& state,
+        const OperatorMatrix& gate,
+        std::size_t qubit1,
+        std::size_t qubit2);
+
+    /**
+     * @brief Applies controlled gate using SIMD
+     * @param state State vector to modify
+     * @param gate Gate matrix to apply
+     * @param control Control qubit
+     * @param target Target qubit
+     */
+    void applyControlledGate(
+        StateVector& state,
+        const OperatorMatrix& gate,
+        std::size_t control,
+        std::size_t target);
+} // namespace simd
+
+} // namespace utils
 
 namespace detail {
+    /**
+     * @brief Internal helper functions for quantum utilities
+     */
 
-double calculateFidelity(const quids::quantum::QuantumState& state1, const quids::quantum::QuantumState& state2);
-double calculateEntanglement(const quids::quantum::QuantumState& state);
-quids::quantum::ErrorSyndrome detect_errors(const quids::quantum::QuantumState& state);
-quids::quantum::QuantumState correct_errors(const quids::quantum::QuantumState& state, const quids::quantum::ErrorSyndrome& syndrome);
-double calculateQuantumSecurity(const quids::quantum::QuantumState& state);
+    [[nodiscard]] double calculateFidelity(
+        const QuantumState& state1,
+        const QuantumState& state2) noexcept;
+
+    [[nodiscard]] double calculateEntanglement(
+        const QuantumState& state) noexcept;
+
+    [[nodiscard]] ErrorSyndrome detectErrors(
+        const QuantumState& state);
+
+    [[nodiscard]] QuantumState correctErrors(
+        const QuantumState& state,
+        const ErrorSyndrome& syndrome);
+
+    [[nodiscard]] double calculateQuantumSecurity(
+        const QuantumState& state) noexcept;
 
 } // namespace detail
 
 } // namespace quids::quantum
+
+#endif // QUIDS_QUANTUM_QUANTUM_UTILS_HPP
 
