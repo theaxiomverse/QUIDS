@@ -1,0 +1,18 @@
+schemaVersion: 2.0.0
+components:
+  - name: dev
+    container:
+      image: public.ecr.aws/aws-mde/universal-image:latest
+commands:
+  - id: install
+    exec:
+      component: dev
+      commandLine: "mkdir -p build && cd build && cmake .."
+  - id: build
+    exec:
+      component: dev
+      commandLine: "cd build && make -j$(nproc)"
+  - id: test
+    exec:
+      component: dev
+      commandLine: "cd build && ctest --output-on-failure"

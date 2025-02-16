@@ -1,0 +1,12 @@
+{
+    "cmake.buildBeforeRun": false,
+    "cmake.clearOutputBeforeBuild": false,
+    "cmake.saveBeforeBuild": false,
+    "cmake.parseBuildDiagnostics": false,
+    "cmake.useCMakePresets": "never",
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.configureOnOpen": false,
+    "cmake.buildType": "Release",
+    "cmake.autoBuild": false,
+    "docker.dockerComposeBuild": false
+}
