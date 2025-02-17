@@ -17,9 +17,9 @@ class QuantumState;
 class QuantumCircuit;
 class QuantumRegister;
 class QuantumGate;
-class QuantumMeasurement;
 
 // Forward declarations of structs
+struct QuantumMeasurement;
 struct QuantumCircuitConfig;
 struct GateOperation;
 struct ErrorSyndrome;

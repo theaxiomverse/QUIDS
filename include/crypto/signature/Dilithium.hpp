@@ -25,6 +25,8 @@ public:
     std::vector<uint8_t> getPublicKey() const;
     std::vector<uint8_t> getPrivateKey() const;
 
+    std::string signMessage(const std::string& message);
+
     // Sign a message
     std::vector<uint8_t> sign(const std::vector<uint8_t>& message);
 

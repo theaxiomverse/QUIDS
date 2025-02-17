@@ -18,105 +18,117 @@
  * @date 2025-02-16
  */
 
-
+#include "blockchain/AIBlock.hpp"
+#include "blockchain/Transaction.hpp"
+#include "blockchain/StandardTransaction.hpp"
 
 #include "crypto/blake3/Blake3Hash.hpp"
 #include "quantum/QuantumState.hpp"
 #include "quantum/QuantumTypes.hpp"
 #include "neural/QuantumPolicyNetwork.hpp"
-#include "memory/MemoryPool.hpp"
+#include "neural/QuantumValueNetwork.hpp"
+
 #include "state/LockFreeStateManager.hpp"
-#include "consensus/QuantumConsensus.hpp"
-#include "rl/QuantumRLAgent.hpp"
-#include "StdNamespace.hpp"
-#include <boost/thread/mutex.hpp>
-#include <memory>
-#include <chrono>
-#include <map>
-#include <algorithm>
-#include <execution>
+
+
+#include <type_traits>
 #include <immintrin.h>
+#include <omp.h>
+#include <cstring>
+#include <cmath>
 #include <array>
 #include <vector>
-
-#include "blockchain/AIBlock.hpp"
+#include <optional>
+#include <mutex>
+#include <memory>
+#include <map>
+#include <algorithm>
+#include <functional>
 
 namespace {
-    constexpr size_t SIMD_ALIGNMENT = 32;
-    constexpr size_t SIMD_WIDTH = 8;
-    constexpr size_t MAX_BATCH_SIZE = 1024;
+    constexpr ::std::size_t SIMD_ALIGNMENT = 32;
+    constexpr ::std::size_t SIMD_WIDTH = 8;
+    constexpr ::std::size_t MAX_BATCH_SIZE = 1024;
     
-    std::array<uint8_t, 32> compute_blake3(const std::vector<uint8_t>& data) {
-        std::array<uint8_t, 32> result{};
-        quids::crypto::Blake3Hash hasher;
+    ::quids::blockchain::ByteArray compute_blake3(const ::quids::blockchain::ByteVector& data) {
+        ::quids::blockchain::ByteArray result{};
+        ::quids::crypto::Blake3Hash hasher;
         hasher.update(data.data(), data.size());
         auto hash = hasher.finalize();
-        std::copy_n(hash.data(), 32, result.data());
+        ::std::copy_n(hash.data(), 32, result.data());
         return result;
     }
 }
 
 namespace quids::blockchain {
 
-using quids::quantum::QuantumState;
-using quids::neural::QuantumPolicyNetwork;
-using quids::crypto::Blake3Hash;
-using boost::mutex;
-using std::lock_guard;
+// Import types from Types.hpp
+using Vector = ::std::vector<Transaction>;
+using UniquePtr = ::std::unique_ptr<state::LockFreeStateManager>;
+using Optional = ::std::optional<ByteArray>;
+using Atomic = ::std::atomic<double>;
+
+
+
+class AIBlock;  // Forward declaration
 
 struct AIBlock::Impl {
-    explicit Impl(const AIBlockConfig& config);
+    explicit Impl(const AIBlockConfig& config)
+        : metrics_()
+        , config_(config)
+        , quantumState_(config.numQubits)
+        , policyNetwork_(config.modelInputSize, config.modelOutputSize, config.numQubits)
+        , transactions_()
+        , stateManager_(::std::make_unique<state::LockFreeStateManager>(config.useParallelProcessing))
+        , currentPrediction_() {
+        metrics_.lastUpdateTime = ::std::chrono::system_clock::now();
+        initializeQuantumCircuit();
+    }
+
+    void initializeQuantumCircuit() {
+        if (config_.useQuantumOptimization) {
+            for (::std::size_t i = 0; i < config_.numQubits; ++i) {
+                quantumState_.applyHadamard(i);
+                if (i < config_.numQubits - 1) {
+                    quantumState_.applyCNOT(i, i + 1);
+                }
+            }
+        }
+    }
+
     AIMetrics metrics_;
     AIBlockConfig config_;
     QuantumState quantumState_;
     QuantumPolicyNetwork policyNetwork_;
-    std::vector<Transaction> transactions_;
-private:
-    void initializeQuantumCircuit();
+    ::std::vector<Transaction> transactions_;
+    ::std::unique_ptr<state::LockFreeStateManager> stateManager_;
+    ::std::vector<double> currentPrediction_;
 };
 
-// Constructor implementation
-AIBlock::Impl::Impl(const AIBlockConfig& config)
-    : metrics_()
-    , config_(config)
-    , quantumState_(config.numQubits)
-    , policyNetwork_(config.modelInputSize, config.modelOutputSize)
-    , transactions_() {
-    metrics_.lastUpdateTime = std::chrono::system_clock::now();
-    initializeQuantumCircuit();
-}
-
-void AIBlock::Impl::initializeQuantumCircuit() {
-    if (config_.useQuantumOptimization) {
-        // Apply Hadamard gates to create superposition
-        for (size_t i = 0; i < config_.numQubits; ++i) {
-            quantumState_.applyHadamard(i);
-            if (i < config_.numQubits - 1) {
-                quantumState_.applyCNOT(i, i + 1);
-            }
-        }
-    }
-}
-
-// Forward declarations
-class Transaction;
-class Block;
-struct AIBlockConfig;
-class AIMetrics;
-class MemoryPool;
-class StateManager;
-class ConsensusModule;
-class RLAgent;
-
-// Method implementations
 AIBlock::AIBlock(const AIBlockConfig& config)
-    : impl_(std::make_unique<Impl>(config))
-    , txPool_(std::make_unique<MemoryPool>(config.maxTransactionsPerBlock))
-    , stateManager_(std::make_unique<StateManager>(config.useParallelProcessing))
-    , consensus_(std::make_unique<ConsensusModule>(config.useQuantumOptimization))
-    , agent_(std::make_unique<RLAgent>(config.modelInputSize, config.modelOutputSize)) {
-    stateBuffer_.fill(0.0);
+    : Block()
+    , impl_(::std::make_unique<Impl>(config))
+    , txPool_(::std::make_unique<memory::MemoryPool<Transaction>>(config.maxTransactionsPerBlock))
+    , stateManager_(::std::make_unique<state::LockFreeStateManager>(config.useParallelProcessing))
+    , consensusModule_(::std::make_unique<consensus::QuantumConsensusModule>(config.useQuantumOptimization))
+    , rlAgent_(::std::make_unique<rl::QuantumRLAgent>(config.modelInputSize, config.modelOutputSize))
+    , policyNetwork_(::std::make_unique<neural::QuantumPolicyNetwork>(config.modelInputSize, config.modelOutputSize, config.numQubits))
+    , valueNetwork_(::std::make_unique<neural::QuantumValueNetwork>())
+    , quantumState_(::std::make_unique<quantum::QuantumState>(config.numQubits))
+    , quantumCircuit_(::std::make_unique<quantum::QuantumCircuit>(config.numQubits))
+    , mutex_()
+    , cachedHash_()
+    , cachedMerkleRoot_()
+    , blockNumber_(0)
+    , previousHash_()
+    , merkleRoot_()
+    , timestamp_(::std::chrono::system_clock::now())
+    , nonce_(0)
+    , difficulty_(0)
+    , stateBuffer_() {
 }
+
+AIBlock::~AIBlock() = default;
 
 /**
  * @brief Adds a transaction to the block
@@ -124,18 +136,17 @@ AIBlock::AIBlock(const AIBlockConfig& config)
  * @return true if transaction was added successfully, false otherwise
  */
 bool AIBlock::addTransaction(const Transaction& tx) {
-    lock_guard<std::mutex> lock(mutex_);
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
     if (impl_->transactions_.size() >= impl_->config_.maxTransactionsPerBlock) {
         return false;
     }
 
-    // Use move semantics for transaction
     impl_->transactions_.emplace_back(tx);
     
     if (impl_->config_.useQuantumOptimization) {
         auto features = extractFeatures(tx);
-        impl_->quantumState_.features = features;
+        impl_->quantumState_.encode(features);
         applyQuantumCircuit(impl_->quantumState_);
     }
     
@@ -148,14 +159,13 @@ bool AIBlock::addTransaction(const Transaction& tx) {
  * @brief Verifies the integrity of the block
  * @return true if block is valid, false otherwise
  */
-bool AIBlock::verifyBlock() const {
-    lock_guard<std::mutex> lock(mutex_);
+bool AIBlock::verify() const {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
-    if (computeHash() != this->previousHash) {
+    if (hash() != previousHash_) {
         return false;
     }
-    
-    if (computeMerkleRoot() != this->merkleRoot) {
+    if (*cachedMerkleRoot_ != merkleRoot_) {
         return false;
     }
     
@@ -163,101 +173,117 @@ bool AIBlock::verifyBlock() const {
         return false;
     }
     
-    return std::all_of(impl_->transactions_.begin(), impl_->transactions_.end(), 
-        [](const Transaction& tx) { return tx.verify(); });
+    return ::std::all_of(impl_->transactions_.begin(), impl_->transactions_.end(), 
+        [](const quids::blockchain::Transaction& tx) { return tx.verify(); });
 }
 
 /**
  * @brief Computes the block hash using BLAKE3
  * @return The computed hash as a 32-byte array
  */
-std::array<uint8_t, 32> AIBlock::computeHash() const {
-    lock_guard<std::mutex> lock(mutex_);
+ByteArray AIBlock::hash() const {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
     if (cachedHash_) {
         return *cachedHash_;
     }
-    
-    std::vector<uint8_t> data;
-    data.reserve(1024);
-    
-    auto addToData = [&data](const auto& value) {
-        const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&value);
-        data.insert(data.end(), bytes, bytes + sizeof(value));
-    };
-    
-    addToData(number);
-    data.insert(data.end(), this->previousHash.begin(), this->previousHash.end());
-    data.insert(data.end(), this->merkleRoot.begin(), this->merkleRoot.end());
-    addToData(timestamp);
-    addToData(nonce);
-    addToData(difficulty);
-    
-    cachedHash_ = compute_blake3(data);
+  
     return *cachedHash_;
 }
 
-std::array<uint8_t, 32> AIBlock::computeMerkleRoot() const {
-    lock_guard<std::mutex> lock(mutex_);
+void AIBlock::computeHash() {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
-    if (cachedMerkleRoot_) {
-        return *cachedMerkleRoot_;
-    }
+    ByteVector data;
+    data.reserve(1024);
+    
+    auto addToData = [&data](const auto& value) {
+        const uint8_t* bytes = reinterpret_cast<const uint8_t*>(::std::addressof(value));
+        data.insert(data.end(), bytes, bytes + sizeof(value));
+    };
+    
+    addToData(blockNumber_);
+    data.insert(data.end(), previousHash_.begin(), previousHash_.end());
+    data.insert(data.end(), merkleRoot_.begin(), merkleRoot_.end());
+    addToData(timestamp_);
+    addToData(nonce_);
+    addToData(difficulty_);
+    
+    ByteArray result{};
+    Blake3Hash hasher;
+    hasher.update(data.data(), data.size());
+    auto hash = hasher.finalize();
+    std::copy(hash.begin(), hash.end(), result.begin());
+    cachedHash_ = result;
+}
+
+void AIBlock::computeMerkleRoot() {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
     if (impl_->transactions_.empty()) {
-        return std::array<uint8_t, 32>{};
+        merkleRoot_ = ByteArray{};
+        return;
     }
 
-    std::vector<std::array<uint8_t, 32>> hashes;
+    ::std::vector<ByteArray> hashes;
     hashes.reserve(impl_->transactions_.size());
 
-    // Compute transaction hashes
     for (const auto& tx : impl_->transactions_) {
-        auto serialized = tx.serialize();
-        hashes.push_back(compute_blake3(serialized));
+        ByteVector serialized;
+        tx.serialize(serialized);
+        ByteArray hash{};
+        Blake3Hash hasher;
+        hasher.update(serialized.data(), serialized.size());
+        auto result = hasher.finalize();
+        std::copy(result.begin(), result.end(), hash.begin());
+        hashes.push_back(hash);
     }
 
-    // Build Merkle tree
     while (hashes.size() > 1) {
         if (hashes.size() % 2 != 0) {
             hashes.push_back(hashes.back());
         }
 
-        std::vector<std::array<uint8_t, 32>> newHashes;
+            std::vector<ByteArray> newHashes;
         newHashes.reserve(hashes.size() / 2);
 
         for (size_t i = 0; i < hashes.size(); i += 2) {
-            std::vector<uint8_t> combined;
+            ByteVector combined;
             combined.reserve(64);
             combined.insert(combined.end(), hashes[i].begin(), hashes[i].end());
             combined.insert(combined.end(), hashes[i + 1].begin(), hashes[i + 1].end());
-            newHashes.push_back(compute_blake3(combined));
+            
+            ByteArray hash{};
+            Blake3Hash hasher;
+            hasher.update(combined.data(), combined.size());
+            auto result = hasher.finalize();
+            std::copy(result.begin(), result.end(), hash.begin());
+            newHashes.push_back(hash);
         }
 
-        hashes = std::move(newHashes);
+        hashes = ::std::move(newHashes);
     }
 
-    cachedMerkleRoot_ = hashes[0];
-    return *cachedMerkleRoot_;
+    merkleRoot_ = hashes[0];
 }
 
 /**
  * @brief Updates block metrics including throughput, latency, and quantum advantage
  */
 void AIBlock::updateMetrics() {
-    auto now = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+    auto now = ::std::chrono::system_clock::now();
+    auto duration = ::std::chrono::duration_cast<::std::chrono::milliseconds>(
         now - impl_->metrics_.lastUpdateTime
     ).count();
     
     const size_t numTransactions = impl_->transactions_.size();
     const double throughput = numTransactions * 1000.0 / duration;
     const double latency = duration / static_cast<double>(numTransactions);
-    const double quantumAdvantage = std::abs(impl_->quantumState_.entanglementMatrix().determinant());
+    const double quantumAdvantage = ::std::abs(impl_->quantumState_.entanglementMatrix().determinant());
     
-    impl_->metrics_.throughput.store(throughput, std::memory_order_relaxed);
-    impl_->metrics_.latency.store(latency, std::memory_order_relaxed);
-    impl_->metrics_.quantumAdvantage.store(quantumAdvantage, std::memory_order_relaxed);
+    impl_->metrics_.throughput.store(throughput, ::std::memory_order_relaxed);
+    impl_->metrics_.latency.store(latency, ::std::memory_order_relaxed);
+    impl_->metrics_.quantumAdvantage.store(quantumAdvantage, ::std::memory_order_relaxed);
     
     impl_->metrics_.lastUpdateTime = now;
 }
@@ -265,9 +291,9 @@ void AIBlock::updateMetrics() {
 void AIBlock::optimizeParameters() {
     if (!impl_->config_.useQuantumOptimization) return;
     
-    applyQuantumOptimization();
+    impl_->policyNetwork_.forward();
     
-    auto gradients = impl_->policyNetwork_.getGradients();
+    auto gradients = impl_->policyNetwork_.calculateQuantumGradients();
     for (size_t i = 0; i < gradients.size(); ++i) {
         double param = impl_->policyNetwork_.getParameter(i);
         param -= impl_->config_.learningRate * gradients[i];
@@ -275,14 +301,14 @@ void AIBlock::optimizeParameters() {
     }
 }
 
-std::vector<double> AIBlock::extractFeatures(const Transaction& tx) const {
-    std::vector<double> features;
+::std::vector<double> AIBlock::extractFeatures(const Transaction& tx) const {
+    ::std::vector<double> features;
     features.reserve(impl_->config_.modelInputSize);
     
-    features.push_back(static_cast<double>(tx.nonce));
-    features.push_back(static_cast<double>(tx.value));
-    features.push_back(static_cast<double>(tx.gas_price));
-    features.push_back(static_cast<double>(tx.gas_limit));
+    features.push_back(static_cast<double>(tx.getNonce()));
+    features.push_back(static_cast<double>(tx.getValue()));
+   // features.push_back(static_cast<double>(tx.getGas()));
+   // features.push_back(static_cast<double>(tx.getGasLimit()));
     
     while (features.size() < impl_->config_.modelInputSize) {
         features.push_back(0.0);
@@ -297,27 +323,26 @@ void AIBlock::processBlockParallel() {
     }
 
     const size_t numTransactions = impl_->transactions_.size();
-    const size_t batchSize = std::min(impl_->config_.batchSize, MAX_BATCH_SIZE);
+    const size_t batchSize = ::std::min(impl_->config_.batchSize, MAX_BATCH_SIZE);
     
     for (size_t i = 0; i < numTransactions; i += batchSize) {
-        const size_t currentBatchSize = std::min(batchSize, numTransactions - i);
-        std::vector<Transaction> batch(
-            impl_->transactions_.begin() + i,
-            impl_->transactions_.begin() + i + currentBatchSize
-        );
+        const size_t currentBatchSize = ::std::min(batchSize, numTransactions - i);
+        ::std::vector<std::reference_wrapper<const Transaction>> batch;
+        batch.reserve(currentBatchSize);
+        for (size_t j = 0; j < currentBatchSize; ++j) {
+            batch.emplace_back(impl_->transactions_[i + j]);
+        }
         
         if (impl_->config_.useSIMD) {
             processTransactionsSIMD(batch);
         } else {
-            std::for_each(
-                std::execution::par_unseq,
-                batch.begin(),
-                batch.end(),
-                [this](const Transaction& tx) {
-                    auto features = extractFeatures(tx);
-                    stateManager_->updateState(features);
+            #pragma omp parallel for
+            for (size_t j = 0; j < batch.size(); ++j) {
+                auto features = extractFeatures(batch[j]);
+                for (const auto& feature : features) {
+                    impl_->stateManager_->updateState(feature);
                 }
-            );
+            }
         }
     }
 }
@@ -326,25 +351,23 @@ void AIBlock::processBlockParallel() {
  * @brief Processes transactions in parallel using SIMD optimizations
  * @param batch The batch of transactions to process
  */
-void AIBlock::processTransactionsSIMD(const std::vector<Transaction>& batch) {
+void AIBlock::processTransactionsSIMD(const ::std::vector<std::reference_wrapper<const Transaction>>& batch) {
     const size_t numTransactions = batch.size();
     const size_t numIterations = (numTransactions + SIMD_WIDTH - 1) / SIMD_WIDTH;
     
     #pragma omp parallel for
     for (size_t i = 0; i < numIterations; ++i) {
         const size_t offset = i * SIMD_WIDTH;
-        const size_t remaining = std::min(SIMD_WIDTH, numTransactions - offset);
+        const size_t remaining = ::std::min(SIMD_WIDTH, numTransactions - offset);
         
-        alignas(SIMD_ALIGNMENT) std::array<double, SIMD_WIDTH> gasBuffer;
-        alignas(SIMD_ALIGNMENT) std::array<double, SIMD_WIDTH> valueBuffer;
+        alignas(SIMD_ALIGNMENT) ::std::array<double, SIMD_WIDTH> gasBuffer;
+        alignas(SIMD_ALIGNMENT) ::std::array<double, SIMD_WIDTH> valueBuffer;
         
-        // Load data
         for (size_t j = 0; j < remaining; ++j) {
-            gasBuffer[j] = static_cast<double>(batch[offset + j].gas_price);
-            valueBuffer[j] = static_cast<double>(batch[offset + j].value);
+            gasBuffer[j] = static_cast<double>(batch[offset + j].get().getGasPrice());
+            valueBuffer[j] = static_cast<double>(batch[offset + j].get().getValue());
         }
         
-        // Process with SIMD
         #if defined(__AVX2__)
         __m256d gas = _mm256_load_pd(gasBuffer.data());
         __m256d value = _mm256_load_pd(valueBuffer.data());
@@ -356,22 +379,21 @@ void AIBlock::processTransactionsSIMD(const std::vector<Transaction>& batch) {
         }
         #endif
         
-        // Update state
         for (size_t j = 0; j < remaining; ++j) {
-            stateManager_->updateState(stateBuffer_[j]);
+            impl_->stateManager_->updateState(stateBuffer_[j]);
         }
     }
 }
 
 void AIBlock::applyQuantumOptimization() {
-    lock_guard<std::mutex> lock(mutex_);
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
     if (!impl_->config_.useQuantumOptimization) return;
 
     QuantumState currentState = impl_->quantumState_;  // Create a copy
     applyQuantumCircuit(currentState);
     impl_->policyNetwork_.updatePolicy(impl_->currentPrediction_);
-    impl_->quantumState_ = std::move(currentState);  // Move the state back
+    impl_->quantumState_ = ::std::move(currentState);  // Move the state back
 }
 
 /**
@@ -394,7 +416,7 @@ void AIBlock::applyQuantumCircuit(QuantumState& state) const {
 }
 
 double AIBlock::calculateQuantumSecurityScore() const {
-    lock_guard<mutex> lock(mutex_);
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     
     double entropyScore = computeTransactionEntropy();
     double quantumScore = impl_->quantumState_.getStateVector().norm();
@@ -408,10 +430,10 @@ double AIBlock::computeTransactionEntropy() const {
         return 0.0;
     }
     
-    std::map<std::string, size_t> addressFreq;
+    ::std::map<::std::string, size_t> addressFreq;
     for (const auto& tx : impl_->transactions_) {
-        addressFreq[tx.from]++;
-        addressFreq[tx.to]++;
+        addressFreq[tx.getFrom()]++;
+        addressFreq[tx.getTo()]++;
     }
     
     double entropy = 0.0;
@@ -419,10 +441,10 @@ double AIBlock::computeTransactionEntropy() const {
     
     for (const auto& [_, freq] : addressFreq) {
         double p = freq / totalAddresses;
-        entropy -= p * std::log2(p);
+        entropy -= p * ::std::log2(p);
     }
     
-    return entropy / std::log2(totalAddresses);
+    return entropy / ::std::log2(totalAddresses);
 }
 
 void AIBlock::invalidateCache() {
@@ -430,14 +452,107 @@ void AIBlock::invalidateCache() {
     cachedMerkleRoot_.reset();
 }
 
-const AIBlock::AIMetrics& AIBlock::getMetrics() const {
-    lock_guard<mutex> lock(mutex_);
+const ::quids::blockchain::AIMetrics& AIBlock::getMetrics() const {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     return impl_->metrics_;
 }
 
 AIBlockConfig AIBlock::getConfig() const {
-    lock_guard<mutex> lock(mutex_);
+    ::std::lock_guard<::std::mutex> lock(mutex_);
     return impl_->config_;
+}
+
+void AIBlock::serialize(ByteVector& out) const {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
+    
+    out.reserve(1024);
+    
+    auto addToData = [&out](const auto& value) {
+        const uint8_t* bytes = reinterpret_cast<const uint8_t*>(::std::addressof(value));
+        out.insert(out.end(), bytes, bytes + sizeof(value));
+    };
+    
+    addToData(blockNumber_);
+    out.insert(out.end(), previousHash_.begin(), previousHash_.end());
+    out.insert(out.end(), merkleRoot_.begin(), merkleRoot_.end());
+    addToData(timestamp_);
+    addToData(nonce_);
+    addToData(difficulty_);
+    
+    // Serialize transactions
+    addToData(impl_->transactions_.size());
+    for (const auto& tx : impl_->transactions_) {
+        ByteVector txData;
+        tx.serialize(txData);
+        out.insert(out.end(), txData.begin(), txData.end());
+    }
+}
+
+void AIBlock::deserialize(const ByteVector& in) {
+    ::std::lock_guard<::std::mutex> lock(mutex_);
+    
+    if (in.size() < sizeof(uint64_t) * 4 + 64) {
+        throw ::std::runtime_error("Invalid data size for deserialization");
+    }
+    
+    size_t offset = 0;
+    
+    auto readFromData = [&in, &offset](auto& value) {
+        if (offset + sizeof(value) > in.size()) {
+            return false;
+        }
+        ::std::memcpy(&value, in.data() + offset, sizeof(value));
+        offset += sizeof(value);
+        return true;
+    };
+    
+    if (!readFromData(blockNumber_)) {
+        throw ::std::runtime_error("Failed to read block number");
+    }
+    
+    if (offset + 32 <= in.size()) {
+        ::std::copy_n(in.data() + offset, 32, previousHash_.begin());
+        offset += 32;
+    } else {
+        throw ::std::runtime_error("Failed to read previous hash");
+    }
+    
+    if (offset + 32 <= in.size()) {
+        ::std::copy_n(in.data() + offset, 32, merkleRoot_.begin());
+        offset += 32;
+    } else {
+        throw ::std::runtime_error("Failed to read merkle root");
+    }
+    
+    if (!readFromData(timestamp_)) {
+        throw ::std::runtime_error("Failed to read timestamp");
+    }
+    if (!readFromData(nonce_)) {
+        throw ::std::runtime_error("Failed to read nonce");
+    }
+    if (!readFromData(difficulty_)) {
+        throw ::std::runtime_error("Failed to read difficulty");
+    }
+    
+    size_t numTransactions;
+    if (!readFromData(numTransactions)) {
+        throw ::std::runtime_error("Failed to read number of transactions");
+    }
+    
+    impl_->transactions_.clear();
+    impl_->transactions_.reserve(numTransactions);
+    
+    for (size_t i = 0; i < numTransactions; ++i) {
+        StandardTransaction tx;
+        ByteVector txData(in.begin() + offset, in.end());
+        if (!tx.deserialize(txData)) {
+            throw ::std::runtime_error("Failed to deserialize transaction");
+        }
+        impl_->transactions_.push_back(tx);
+        offset += txData.size();
+    }
+    
+    invalidateCache();
 }
 
 }

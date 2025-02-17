@@ -1,14 +1,21 @@
-#ifndef QUIDS_QUANTUM_QUANTUM_GATES_HPP
-#define QUIDS_QUANTUM_QUANTUM_GATES_HPP
+#ifndef QUIDS_QUANTUM_GATES_HPP
+#define QUIDS_QUANTUM_GATES_HPP
 
-#include "StdNamespace.hpp"
 #include "QuantumTypes.hpp"
-#include <Eigen/Dense>
 #include <complex>
-#include <vector>
 #include <cmath>
+#include <vector>
+#include <Eigen/Dense>
 
 namespace quids::quantum {
+namespace gates {
+
+using Complex = std::complex<double>;
+using GateMatrix = ::quids::quantum::GateMatrix;
+using OperatorMatrix = ::quids::quantum::OperatorMatrix;
+using GateOperation = ::quids::quantum::GateOperation;
+
+constexpr double QUANTUM_ERROR_THRESHOLD = ::quids::quantum::constants::QUANTUM_ERROR_THRESHOLD;
 
 /**
  * @brief Quantum gate factory and manipulation utilities
@@ -17,7 +24,6 @@ namespace quids::quantum {
  * including standard gates, controlled operations, and custom unitary matrices.
  * All gates are represented as unitary matrices that preserve quantum state norms.
  */
-namespace gates {
 
 /**
  * @brief Standard single-qubit gates
@@ -26,37 +32,31 @@ namespace gates {
  * These gates form a basis for quantum computation and are used as building
  * blocks for more complex operations.
  */
-namespace standard {
-    /// Hadamard gate: Creates superposition
-    static const GateMatrix H = (GateMatrix(2,2) << 
-        1/std::sqrt(2),  1/std::sqrt(2),
-        1/std::sqrt(2), -1/std::sqrt(2)).finished();
 
-    /// Pauli-X gate: Quantum NOT operation
-    static const GateMatrix X = (GateMatrix(2,2) << 
-        0, 1,
-        1, 0).finished();
+// Standard quantum gates
+const GateMatrix H = (GateMatrix(2,2) << 
+    1/std::sqrt(2), 1/std::sqrt(2),
+    1/std::sqrt(2), -1/std::sqrt(2)).finished();
 
-    /// Pauli-Y gate: Complex rotation
-    static const GateMatrix Y = (GateMatrix(2,2) << 
-        0, Complex(0,-1),
-        Complex(0,1), 0).finished();
+const GateMatrix X = (GateMatrix(2,2) << 
+    0, 1,
+    1, 0).finished();
 
-    /// Pauli-Z gate: Phase flip
-    static const GateMatrix Z = (GateMatrix(2,2) << 
-        1,  0,
-        0, -1).finished();
+const GateMatrix Y = (GateMatrix(2,2) << 
+    0, Complex(0,-1),
+    Complex(0,1), 0).finished();
 
-    /// S gate: √Z phase gate
-    static const GateMatrix S = (GateMatrix(2,2) << 
-        1, 0,
-        0, Complex(0,1)).finished();
+const GateMatrix Z = (GateMatrix(2,2) << 
+    1, 0,
+    0, -1).finished();
 
-    /// T gate: π/4 phase gate
-    static const GateMatrix T = (GateMatrix(2,2) << 
-        1, 0,
-        0, std::exp(Complex(0, M_PI/4))).finished();
-} // namespace standard
+const GateMatrix S = (GateMatrix(2,2) << 
+    1, 0,
+    0, Complex(0,1)).finished();
+
+const GateMatrix T = (GateMatrix(2,2) << 
+    1, 0,
+    0, std::exp(Complex(0, M_PI/4))).finished();
 
 /**
  * @brief Creates a rotation gate around specified axis
@@ -96,9 +96,7 @@ namespace standard {
  * @param tolerance Maximum allowed deviation from unitarity
  * @return true if matrix is unitary within tolerance
  */
-[[nodiscard]] bool isValidGate(
-    const OperatorMatrix& matrix,
-    double tolerance = constants::QUANTUM_ERROR_THRESHOLD) noexcept;
+[[nodiscard]] bool isValidGate(const GateMatrix& gate) noexcept;
 
 /**
  * @brief Decomposes a unitary matrix into basic gates
@@ -147,4 +145,4 @@ namespace detail {
 } // namespace gates
 } // namespace quids::quantum
 
-#endif // QUIDS_QUANTUM_QUANTUM_GATES_HPP
+#endif // QUIDS_QUANTUM_GATES_HPP

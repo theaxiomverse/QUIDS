@@ -1,46 +1,27 @@
 #include "neural/QuantumPolicyNetwork.hpp"
-#include "quantum/QuantumState.hpp"
-#include "quantum/QuantumCircuit.hpp"
 #include <Eigen/Dense>
-#include <random>
 #include <cmath>
-#include <stdexcept>
+#include <random>
 
 namespace quids::neural {
-namespace detail {
 
-struct QuantumPolicyNetworkState {
+struct QuantumPolicyNetwork::Impl {
+    Impl(size_t stateSize, size_t actionSize, size_t numQubits)
+        : stateSize(stateSize), actionSize(actionSize), numQubits(numQubits),
+          parameters(stateSize * actionSize), gradients(stateSize * actionSize),
+          policyMatrix(Eigen::MatrixXd::Zero(stateSize, actionSize)) {}
+
     size_t stateSize;
     size_t actionSize;
     size_t numQubits;
     std::vector<double> parameters;
     std::vector<double> gradients;
-    double entropy{0.0};
-    quantum::QuantumState currentState;
-
-    QuantumPolicyNetworkState(size_t s, size_t a, size_t n);
-    void initializeParameters();
+    Eigen::MatrixXd policyMatrix;
+    std::vector<double> currentState;
 };
 
-QuantumPolicyNetworkState::QuantumPolicyNetworkState(size_t s, size_t a, size_t n)
-    : stateSize(s), actionSize(a), numQubits(n),
-      parameters(s * a), gradients(s * a), currentState(n) {
-    initializeParameters();
-}
-
-void QuantumPolicyNetworkState::initializeParameters() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::normal_distribution<double> dist(0.0, 0.1);
-    for (auto& param : parameters) {
-        param = dist(gen);
-    }
-}
-
-} // namespace detail
-
 QuantumPolicyNetwork::QuantumPolicyNetwork(size_t stateSize, size_t actionSize, size_t numQubits)
-    : impl_(std::make_unique<detail::QuantumPolicyNetworkState>(stateSize, actionSize, numQubits)) {}
+    : impl_(std::make_unique<Impl>(stateSize, actionSize, numQubits)) {}
 
 QuantumPolicyNetwork::~QuantumPolicyNetwork() = default;
 
@@ -62,78 +43,80 @@ size_t QuantumPolicyNetwork::getNumParameters() const {
     return impl_->parameters.size();
 }
 
-void QuantumPolicyNetwork::forward() {
-    // Base forward pass without state input
-    // This is used for internal network operations
-}
-
-void QuantumPolicyNetwork::backward() {
-    // Compute gradients for all parameters
-    // This is called during training
-}
-
 std::vector<double> QuantumPolicyNetwork::getGradients() const {
     return impl_->gradients;
 }
 
-std::vector<double> QuantumPolicyNetwork::forward(const quantum::QuantumState& state) {
+std::vector<double> QuantumPolicyNetwork::getQuantumParameters() const {
+    return impl_->parameters;
+}
+
+void QuantumPolicyNetwork::forward(const std::vector<double>& state) {
+    if (state.empty()) {
+        throw std::runtime_error("State vector is empty");
+    }
+
     impl_->currentState = state;
-    std::vector<double> actionProbs(impl_->actionSize);
-    
-    // Apply quantum circuit to get action probabilities
-    Eigen::VectorXd stateVector = state.getStateVector().real();
-    Eigen::MatrixXd policyMatrix(impl_->stateSize, impl_->actionSize);
-    
+
     // Reshape parameters into policy matrix
-    const auto& params = impl_->parameters;
     for (size_t i = 0; i < impl_->stateSize; ++i) {
         for (size_t j = 0; j < impl_->actionSize; ++j) {
-            policyMatrix(i, j) = params[i * impl_->actionSize + j];
+            impl_->policyMatrix(i, j) = impl_->parameters[i * impl_->actionSize + j];
         }
     }
-    
-    // Compute action probabilities using softmax
-    Eigen::VectorXd logits = policyMatrix.transpose() * stateVector;
-    double maxLogit = logits.maxCoeff();
-    Eigen::VectorXd expLogits = (logits.array() - maxLogit).exp();
-    double sumExpLogits = expLogits.sum();
-    
+
+    // Apply softmax to get action probabilities
+    for (size_t i = 0; i < impl_->stateSize; ++i) {
+        double max_val = impl_->policyMatrix.row(i).maxCoeff();
+        impl_->policyMatrix.row(i) = (impl_->policyMatrix.row(i).array() - max_val).exp();
+        impl_->policyMatrix.row(i) /= impl_->policyMatrix.row(i).sum();
+    }
+}
+
+void QuantumPolicyNetwork::backward(const std::vector<double>& gradOutput) {
+    if (gradOutput.size() != impl_->actionSize) {
+        throw std::runtime_error("Invalid gradient output size");
+    }
+
+    // Compute gradients
+    for (size_t i = 0; i < impl_->stateSize; ++i) {
+        for (size_t j = 0; j < impl_->actionSize; ++j) {
+            size_t idx = i * impl_->actionSize + j;
+            impl_->gradients[idx] = gradOutput[j] * impl_->policyMatrix(i, j) * 
+                                  (1.0 - impl_->policyMatrix(i, j));
+        }
+    }
+}
+
+void QuantumPolicyNetwork::updatePolicy(const std::vector<double>& rewards) {
+    if (rewards.empty()) {
+        throw std::runtime_error("Rewards vector is empty");
+    }
+
+    // Update parameters using rewards and gradients
+    double learning_rate = 0.01; // Could be made configurable
+    for (size_t i = 0; i < impl_->parameters.size(); ++i) {
+        impl_->parameters[i] += learning_rate * impl_->gradients[i] * rewards[0];
+    }
+}
+
+std::vector<double> QuantumPolicyNetwork::getActionProbabilities() const {
+    if (impl_->currentState.empty()) {
+        throw std::runtime_error("No state has been processed yet");
+    }
+
+    std::vector<double> probs(impl_->actionSize);
     for (size_t i = 0; i < impl_->actionSize; ++i) {
-        actionProbs[i] = expLogits(i) / sumExpLogits;
+        probs[i] = impl_->policyMatrix(0, i); // Using first row as current state
     }
-    
-    // Compute entropy for regularization
-    double entropy = 0.0;
-    for (double prob : actionProbs) {
-        if (prob > 0.0) {
-            entropy -= prob * std::log(prob);
-        }
-    }
-    
-    return actionProbs;
+    return probs;
 }
 
-void QuantumPolicyNetwork::updatePolicy(const std::vector<double>& advantages) {
-    if (advantages.size() != impl_->actionSize) {
-        throw std::invalid_argument("Advantages size does not match action size");
-    }
-    
-    // Compute policy gradients
-    Eigen::VectorXd stateVector = impl_->currentState.getStateVector().real();
-    std::vector<double> gradients(impl_->parameters.size());
-    
-    for (size_t i = 0; i < impl_->stateSize; ++i) {
-        for (size_t j = 0; j < impl_->actionSize; ++j) {
-            size_t paramIndex = i * impl_->actionSize + j;
-            gradients[paramIndex] = stateVector(i) * advantages[j];
-        }
-    }
-    
-    impl_->gradients = gradients;
-}
-
-double QuantumPolicyNetwork::getPolicyEntropy() const {
-    return impl_->entropy;
+void QuantumPolicyNetwork::resetNetworkState() {
+    impl_->parameters = std::vector<double>(impl_->stateSize * impl_->actionSize);
+    impl_->gradients = std::vector<double>(impl_->stateSize * impl_->actionSize);
+    impl_->policyMatrix = Eigen::MatrixXd::Zero(impl_->stateSize, impl_->actionSize);
+    impl_->currentState.clear();
 }
 
 } // namespace quids::neural 

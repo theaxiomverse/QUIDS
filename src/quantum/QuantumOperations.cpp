@@ -1,12 +1,16 @@
+#pragma once
 #include "quantum/QuantumOperations.hpp"
-#include "quantum/QuantumState.hpp"
-#include "quantum/QuantumGates.hpp"
+
 #include <stdexcept>
 #include <complex>
 #include <cmath>
 
 namespace quids {
 namespace quantum {
+namespace operations {
+
+
+
 
 // Implementation of quantum operations
 void applyControlledOperation(QuantumState& state, 
@@ -85,3 +89,4 @@ void applySwap(QuantumState& state, size_t qubit1, size_t qubit2) {
 
 } // namespace quantum
 } // namespace quids
+}

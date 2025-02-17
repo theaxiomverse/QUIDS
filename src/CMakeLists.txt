@@ -3,6 +3,7 @@ file(GLOB_RECURSE SOURCES
     "blockchain/*.cpp"
     "crypto/*.cpp"
     "quantum/*.cpp"
+    "neural/*.cpp"
     "zkp/*.cpp"
     "storage/*.cpp"
     "rollup/*.cpp"
@@ -64,4 +65,17 @@ target_include_directories(quids_core
         ${libp2p_INCLUDE_DIRS}
 )
 
+# Include the main include directory
 include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Initialize SOURCES variable if not already initialized
+if(NOT DEFINED SOURCES)
+    set(SOURCES "")
+endif()
+
+# Add subdirectories
+add_subdirectory(blockchain)
+add_subdirectory(neural)
+
+# Add source files to parent scope
+set(SOURCES ${SOURCES} PARENT_SCOPE)

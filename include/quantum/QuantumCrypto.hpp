@@ -1,19 +1,23 @@
+#ifndef QUIDS_QUANTUM_QUANTUM_CRYPTO_HPP
+#define QUIDS_QUANTUM_QUANTUM_CRYPTO_HPP
+
 /**
  * @file QuantumCrypto.hpp
  * @brief Quantum cryptography implementation for secure communication and signatures
  * @author QUIDS Team
  */
 
-#pragma once
-
+#include "StdNamespace.hpp"
+#include "QuantumState.hpp"
+#include "QuantumProof.hpp"
 #include <vector>
 #include <memory>
 #include <string>
 #include <array>
 #include <cstdint>
 #include "QKD.hpp"
-#include "QuantumState.hpp"
-#include "QuantumProof.hpp"
+
+
 
 namespace quids::quantum {
 
@@ -32,19 +36,27 @@ enum class SignatureScheme {
  * @brief Structure containing quantum key data and properties
  */
 struct QuantumKey {
-    std::vector<uint8_t> key_material;
+    vector<uint8_t> key_material;
     QuantumState entangled_state{1};  // Initialize with 1 qubit
     double security_parameter{0.0};
     size_t effective_length{0};
+    size_t key_size{256};                              ///< Key size in bits
+    size_t proof_size{256};                              ///< Proof size in bits
+    size_t signature_size{256};                          ///< Signature size in bits
+    size_t hash_size{256};                              ///< Hash size in bits
+    size_t key_material_size{256};      
+                ///< Key material size in bits
 };
 
 /**
  * @brief Structure containing quantum signature data and metadata
  */
 struct QuantumSignature {
-    std::vector<uint8_t> sig_data;  ///< Raw signature data
+        vector<uint8_t> sig_data;  ///< Raw signature data
     SignatureScheme scheme;         ///< Signature scheme used
-    double fidelity;               ///< Quantum state fidelity measure
+    double fidelity;               ///< Quantum state 
+    double proof_fidelity;         ///< Proof 
+    QuantumProof proof;
 };
 
 /**
@@ -55,6 +67,23 @@ struct QuantumEncryptionParams {
     bool use_entanglement{true};                       ///< Whether to use quantum entanglement
     double error_rate{0.01};                           ///< Acceptable quantum error rate
     SignatureScheme sig_scheme{SignatureScheme::DILITHIUM}; ///< Default signature scheme
+    [[maybe_unused]] bool use_quantum_hash{true};                            ///< Whether to use quantum hash function
+    [[maybe_unused]] bool use_quantum_signature{true};                        ///< Whether to use quantum signature
+    [[maybe_unused]] bool use_quantum_key_distribution{true};                  ///< Whether to use quantum key distribution
+    [[maybe_unused]] bool use_quantum_random_number_generation{true};         ///< Whether to use quantum random number generation
+    [[maybe_unused]] bool use_quantum_entropy{true};                          ///< Whether to use quantum entropy
+    [[maybe_unused]] bool use_quantum_random_seed{true};                      ///< Whether to use quantum random seed
+    [[maybe_unused]] bool use_quantum_random_bytes{true};                     ///< Whether to use quantum random bytes
+    [[maybe_unused]] bool use_quantum_random_seed{true};                      ///< Whether to use quantum random seed
+    [[maybe_unused]] bool use_quantum_random_bytes{true};                     ///< Whether to use quantum random bytes
+    [[maybe_unused]] double noise_threshold{0.01};                          ///< Noise threshold for quantum cryptography    
+    size_t security_parameter{256};                          ///< Security parameter for quantum cryptography   
+    size_t key_size{256};                              ///< Key size in bits
+    size_t proof_size{256};                              ///< Proof size in bits
+    size_t signature_size{256};                          ///< Signature size in bits
+    size_t hash_size{256};                              ///< Hash size in bits
+    size_t key_material_size{256};                      ///< Key material size in bits
+   QuantumKey key;
 };
 
 /**
@@ -74,6 +103,7 @@ public:
 
     // Delete copy/move constructors
     QuantumCrypto(const QuantumCrypto&) = delete;
+    QuantumCrypto(const QuantumEncryptionParams& params);
     QuantumCrypto& operator=(const QuantumCrypto&) = delete;
     QuantumCrypto(QuantumCrypto&&) = delete;
     QuantumCrypto& operator=(QuantumCrypto&&) = delete;
@@ -106,6 +136,37 @@ public:
     quids::quantum::QuantumKey generateKey(const quids::quantum::QuantumEncryptionParams& params);
     
     /**
+     * @brief Distribute a quantum key to a recipient
+     * @param recipient_id ID of recipient to receive key
+     * @param key The quantum key to distribute
+     * @return true if distribution succeeded, false otherwise
+     */
+    bool distributeKey(const std::string& recipient_id, const quids::quantum::QuantumKey& key);
+    
+    /**
+     * @brief Encrypt data using a quantum key
+     * @param data Data to be encrypted
+     * @param key Quantum key for encryption
+     * @return Encrypted data
+     */
+    std::vector<uint8_t> encrypt(const std::vector<uint8_t>& data, const quids::quantum::QuantumKey& key);
+
+    /**
+     * @brief Generate a quantum key pair
+     * @param scheme Signature scheme to use
+     * @return Pair of keys (public, private)
+     */
+    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> generateKeypair(SignatureScheme scheme);
+
+    /**     
+     * @brief Decrypt data using a quantum key
+     * @param data Data to be decrypted
+     * @param key Quantum key for decryption
+     * @return Decrypted data
+     */
+    std::vector<uint8_t> decrypt(const std::vector<uint8_t>& data, const quids::quantum::QuantumKey& key);
+
+    /**
      * @brief Create a quantum-enhanced digital signature for given data
      * @param data Data to be signed
      * @param params Parameters controlling the signature generation
@@ -113,6 +174,15 @@ public:
      */
     quids::quantum::QuantumSignature sign(const std::vector<uint8_t>& data, 
                          const quids::quantum::QuantumEncryptionParams& params);
+
+    /**
+     * @brief Sign a message using a private key
+     * @param message Message to sign
+     * @param private_key Private key to use for signing
+     * @return Signed message
+     */ 
+    quids::quantum::QuantumSignature sign(const std::vector<uint8_t>& message, 
+                    const std::vector<uint8_t>& private_key);   
 
     /**
      * @brief Verify a quantum-enhanced digital signature
@@ -130,6 +200,32 @@ public:
      * @return Key size in bits
      */
     size_t getKeySize() const;
+
+    /**
+     * @brief Get the current security parameter
+     * @return Security parameter
+     */
+    double getSecurityParameter() const;
+
+    /**
+     * @brief Get the current effective key length
+     * @return Effective key length
+     */
+    size_t getEffectiveKeyLength() const;
+
+    /**
+     * @brief Get the current quantum state
+     * @return Quantum state
+     */
+    quids::quantum::QuantumState getQuantumState() const;
+    
+
+    /**
+     * @brief Get the current quantum proof
+     * @return Quantum proof
+     */
+    quids::quantum::QuantumProof getQuantumProof() const;
+    
     
     // Security verification
     double measureSecurityLevel(const QuantumKey& key) const;
@@ -168,4 +264,7 @@ namespace utils {
     bool detectQuantumTampering(const quids::quantum::QuantumMeasurement& measurement);
 } // namespace utils
 
-} // namespace quids::quantum
+    } // namespace quids::quantum
+
+
+#endif // QUIDS_QUANTUM_QUANTUM_CRYPTO_HPP

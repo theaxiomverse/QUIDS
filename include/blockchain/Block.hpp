@@ -1,8 +1,10 @@
 #ifndef QUIDS_BLOCKCHAIN_BLOCK_HPP
 #define QUIDS_BLOCKCHAIN_BLOCK_HPP
 
-#include "StdNamespace.hpp"
+#include "Types.hpp"
 #include "Transaction.hpp"
+#include <vector>
+#include <memory>
 
 /**
  * @file Block.hpp
@@ -24,7 +26,6 @@ namespace quids::blockchain {
  */
 class Block {
 public:
-    Block() = default;
     virtual ~Block() = default;
 
     // Disable copy
@@ -35,53 +36,76 @@ public:
     Block(Block&&) noexcept = default;
     Block& operator=(Block&&) noexcept = default;
 
-    // Core block data
-    uint64_t number{0};                          ///< Block number in chain
-    std::array<uint8_t, 32> previousHash;      ///< Hash of previous block
-    std::array<uint8_t, 32> merkleRoot;        ///< Merkle tree root hash
-    std::array<uint8_t, 32> stateRoot;         ///< State trie root hash
-    std::vector<Transaction> transactions;             ///< Block transactions
-    uint64_t timestamp{0};                       ///< Block creation time
-    uint64_t nonce{0};                          ///< Mining nonce
-    uint32_t difficulty{0};                      ///< Mining difficulty
-    std::vector<uint8_t> signature;            ///< Block signature
-    std::array<uint8_t, 32> hash;             ///< Block hash
-
-    /**
-     * @brief Adds a transaction to the block
-     * @param tx Transaction to add
-     * @return true if transaction was added successfully
-     */
+    // Pure virtual methods that derived classes must implement
     virtual bool addTransaction(const Transaction& tx) = 0;
+    virtual bool verify() const = 0;
+    virtual Hash hash() const = 0;
+    virtual void computeHash() = 0;
+    virtual void computeMerkleRoot() = 0;
+    virtual void applyQuantumOptimization() = 0;
+    virtual double calculateQuantumSecurityScore() const = 0;
+    virtual void serialize(ByteVector& out) const = 0;
+    virtual void deserialize(const ByteVector& in) = 0;
 
-    /**
-     * @brief Verifies block integrity
-     * @return true if block is valid
-     */
-    virtual bool verifyBlock() const = 0;
+protected:
+    Block() = default;
 
-    /**
-     * @brief Computes block hash
-     * @return 32-byte block hash
-     */
-    virtual std::array<uint8_t, 32> computeHash() const = 0;
-
-    /**
-     * @brief Computes Merkle root of transactions
-     * @return 32-byte Merkle root hash
-     */
-        virtual std::array<uint8_t, 32> computeMerkleRoot() const = 0;
-
-    /**
-     * @brief Serializes block data
-     * @return Serialized block data
-     */
-    virtual std::vector<uint8_t> serialize() const = 0;
-
-    /**
-     * @brief Deserializes block data
-     * @param data Serialized block data
-     */virtual void deserialize(const std::vector<uint8_t>& data) = 0;
+    // Protected members
+    Hash previousHash_;
+    Hash merkleRoot_;
+    BlockNumber number_{0};
+    Timestamp timestamp_{::std::chrono::system_clock::now()};
+    ::std::vector<Transaction> transactions_;
+    ::std::vector<Hash> transactionHashes_;
+    ::std::vector<double> quantumStates_;
+    ::std::vector<double> quantumAmplitudes_;
+    ::std::vector<double> quantumPhases_;
+    ::std::vector<double> quantumEntanglement_;
+    ::std::vector<double> quantumSuperposition_;
+    ::std::vector<double> quantumDecoherence_;
+    ::std::vector<double> quantumInterference_;
+    ::std::vector<double> quantumTeleportation_;
+    ::std::vector<double> quantumErrorCorrection_;
+    ::std::vector<double> quantumGates_;
+    ::std::vector<double> quantumMeasurements_;
+    ::std::vector<double> quantumFeatures_;
+    ::std::vector<double> quantumMetrics_;
+    ::std::vector<double> quantumParameters_;
+    ::std::vector<double> quantumGradients_;
+    ::std::vector<double> quantumOptimization_;
+    ::std::vector<double> quantumLearning_;
+    ::std::vector<double> quantumPredictions_;
+    ::std::vector<double> quantumProbabilities_;
+    ::std::vector<double> quantumStatistics_;
+    ::std::vector<double> quantumCorrelations_;
+    ::std::vector<double> quantumCoherence_;
+    ::std::vector<double> quantumEntropy_;
+    ::std::vector<double> quantumFidelity_;
+    ::std::vector<double> quantumPurity_;
+    ::std::vector<double> quantumConcurrence_;
+    ::std::vector<double> quantumDiscord_;
+    ::std::vector<double> quantumNegentropy_;
+    ::std::vector<double> quantumInformation_;
+    ::std::vector<double> quantumComplexity_;
+    ::std::vector<double> quantumCapacity_;
+    ::std::vector<double> quantumEfficiency_;
+    ::std::vector<double> quantumRobustness_;
+    ::std::vector<double> quantumResilience_;
+    ::std::vector<double> quantumSecurity_;
+    ::std::vector<double> quantumPrivacy_;
+    ::std::vector<double> quantumAuthenticity_;
+    ::std::vector<double> quantumIntegrity_;
+    ::std::vector<double> quantumConfidentiality_;
+    ::std::vector<double> quantumAvailability_;
+    ::std::vector<double> quantumReliability_;
+    ::std::vector<double> quantumPerformance_;
+    ::std::vector<double> quantumScalability_;
+    ::std::vector<double> quantumThroughput_;
+    ::std::vector<double> quantumLatency_;
+    ::std::vector<double> quantumBandwidth_;
+    ::std::vector<double> quantumUtilization_;
+    ::std::vector<double> quantumEffectiveness_;
+    ::std::vector<double> quantumQuality_;
 };
 
 } // namespace quids::blockchain
