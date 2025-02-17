@@ -6,8 +6,6 @@
 
 namespace quids::neural {
 
-using QuantumState = ::quids::quantum::QuantumState;
-
 class QuantumValueNetwork::Impl {
 public:
     Impl(::std::size_t stateSize, ::std::size_t numQubits)
@@ -19,7 +17,7 @@ public:
         initializeParameters();
     }
 
-    void initializeParameters() noexcept {
+    void initializeParameters() {
         ::std::random_device rd;
         ::std::mt19937 gen(rd());
         ::std::normal_distribution<double> d(0.0, 0.1);
@@ -34,11 +32,12 @@ public:
     ::std::vector<double> parameters_;
     ::std::vector<double> gradients_;
     double valueLoss_;
-    QuantumState currentState_;
+    quantum::QuantumState currentState_;
 };
 
 QuantumValueNetwork::QuantumValueNetwork()
-    : impl_(::std::make_unique<Impl>(16, 8)) {}  // Default sizes
+    : BaseQuantumNetwork(),
+      impl_(::std::make_unique<Impl>(16, 8)) {}
 
 QuantumValueNetwork::~QuantumValueNetwork() = default;
 
@@ -78,7 +77,7 @@ void QuantumValueNetwork::backward() override {
     // This is called during training
 }
 
-double QuantumValueNetwork::getValue(const QuantumState& state) const {
+double QuantumValueNetwork::getValue(const quantum::QuantumState& state) const {
     // Apply quantum circuit to get state value
     Eigen::VectorXd stateVector = state.getStateVector().real();
     Eigen::VectorXd valueVector = Eigen::Map<Eigen::VectorXd>(impl_->parameters_.data(), impl_->parameters_.size());
@@ -87,7 +86,7 @@ double QuantumValueNetwork::getValue(const QuantumState& state) const {
     return stateVector.dot(valueVector);
 }
 
-void QuantumValueNetwork::updateValue(const QuantumState& state, double target) {
+void QuantumValueNetwork::updateValue(const quantum::QuantumState& state, double target) {
     impl_->currentState_ = state;
     
     // Get current value

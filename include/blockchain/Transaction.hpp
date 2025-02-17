@@ -10,6 +10,9 @@
 
 namespace quids::blockchain {
 
+// Forward declaration only
+class StandardTransaction;
+
 class Transaction {
 public:
     Transaction() = default;
@@ -29,7 +32,6 @@ public:
     [[nodiscard]] const Data& getData() const noexcept { return data; }
     [[nodiscard]] const Signature& getSignature() const noexcept { return signature; }
     [[nodiscard]] const Timestamp& getTimestamp() const noexcept { return timestamp; }
-    [[nodiscard]] uint64_t getNonce() const noexcept { return nonce; }
     [[nodiscard]] uint64_t getAmount() const noexcept { return value; }
     [[nodiscard]] uint64_t calculate_gas_cost() const noexcept { return gas_cost; }
 
@@ -38,8 +40,7 @@ public:
     virtual Address getTo() const = 0;
     virtual GasPrice getGasPrice() const = 0;
     virtual GasLimit getGasLimit() const = 0;
- 
-    virtual uint64_t getNonce() const = 0;
+    [[nodiscard]] virtual uint64_t getNonce() const noexcept = 0;
 
 protected:
     Timestamp timestamp{::std::chrono::system_clock::now()};

@@ -1,8 +1,8 @@
 #ifndef QUIDS_BLOCKCHAIN_AI_BLOCK_HPP
 #define QUIDS_BLOCKCHAIN_AI_BLOCK_HPP
 
-#include "Block.hpp"
-#include "Transaction.hpp"
+#include "blockchain/Block.hpp"
+#include "blockchain/Transaction.hpp"
 #include "Types.hpp"
 #include <atomic>
 #include <mutex>
@@ -23,10 +23,10 @@ struct AIMetrics {
 };
 
 struct AIBlockConfig {
+    ::std::size_t maxTransactionsPerBlock{1000};
     ::std::size_t numQubits{8};
     ::std::size_t modelInputSize{16};
     ::std::size_t modelOutputSize{8};
-    ::std::size_t maxTransactionsPerBlock{1024};
     ::std::size_t batchSize{128};
     ::std::size_t quantumCircuitDepth{4};
     double learningRate{0.001};
@@ -37,45 +37,43 @@ struct AIBlockConfig {
 
 class AIBlock : public Block {
 public:
-    struct Impl;
-
     explicit AIBlock(const AIBlockConfig& config);
     ~AIBlock() override;
 
-    // Delete copy operations
-    AIBlock(const AIBlock&) = delete;
-    AIBlock& operator=(const AIBlock&) = delete;
-
-    // Delete move operations (due to mutex)
-    AIBlock(AIBlock&&) = delete;
-    AIBlock& operator=(AIBlock&&) = delete;
-
     // Block interface implementation
     bool addTransaction(const Transaction& tx) override;
+    size_t getTransactionCount() const override;
+    const Transaction& getTransaction(size_t index) const override;
+    bool verifyTransactions() const override;
     bool verify() const override;
     ByteArray hash() const override;
     void computeHash() override;
     void computeMerkleRoot() override;
     void applyQuantumOptimization() override;
     double calculateQuantumSecurityScore() const override;
+    void serialize(ByteVector& out) const override;
+    bool deserialize(const ByteVector& data) override;
+
+    // AI-specific methods
+    void optimize();
+    ::std::vector<double> extractFeatures(const Transaction& tx) const;
+    double computeScore() const;
 
     // AIBlock specific methods
     const ::quids::blockchain::AIMetrics& getMetrics() const;
     AIBlockConfig getConfig() const;
-    void serialize(ByteVector& out) const override;
-    void deserialize(const ByteVector& in) override;
 
 protected:
     void processBlockParallel();
     void processTransactionsSIMD(const ::std::vector<::std::reference_wrapper<const Transaction>>& batch);
     void applyQuantumCircuit(QuantumState& state) const;
-    ::std::vector<double> extractFeatures(const Transaction& tx) const;
     double computeTransactionEntropy() const;
     void updateMetrics();
     void optimizeParameters();
     void invalidateCache();
 
 private:
+    class Impl;
     ::std::unique_ptr<Impl> impl_;
     ::std::unique_ptr<memory::MemoryPool<Transaction>> txPool_;
     ::std::unique_ptr<state::LockFreeStateManager> stateManager_;

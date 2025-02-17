@@ -93,6 +93,11 @@ public:
     void normalize();
 
     /**
+     * @brief Resets the quantum state to initial state
+     */
+    void reset();
+
+    /**
      * @brief Checks if the state is valid quantum state
      * @return true if state is valid, false otherwise
      */
@@ -172,6 +177,20 @@ public:
      * @throws std::invalid_argument if gate dimensions don't match state
      */
     void applyGateOptimized(const Eigen::MatrixXcd& gate);
+
+    /**
+     * @brief Applies rotation gate with specified angle
+     * @param angle Rotation angle in radians
+     */
+    void applyRotation(double angle);
+
+    /**
+     * @brief Applies rotation gate to specified qubit
+     * @param qubit Target qubit
+     * @param angle Rotation angle in radians
+     * @throws std::out_of_range if qubit is invalid
+     */
+    void applyRotation(std::size_t qubit, double angle);
 
     // Quantum metrics
     /**
