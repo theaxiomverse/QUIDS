@@ -74,11 +74,10 @@ struct QuantumEncryptionParams {
     [[maybe_unused]] bool use_quantum_entropy{true};                          ///< Whether to use quantum entropy
     [[maybe_unused]] bool use_quantum_random_seed{true};                      ///< Whether to use quantum random seed
     [[maybe_unused]] bool use_quantum_random_bytes{true};                     ///< Whether to use quantum random bytes
-    [[maybe_unused]] bool use_quantum_random_seed{true};                      ///< Whether to use quantum random seed
-    [[maybe_unused]] bool use_quantum_random_bytes{true};                     ///< Whether to use quantum random bytes
+                  ///< Whether to use quantum random bytes
     [[maybe_unused]] double noise_threshold{0.01};                          ///< Noise threshold for quantum cryptography    
     size_t security_parameter{256};                          ///< Security parameter for quantum cryptography   
-    size_t key_size{256};                              ///< Key size in bits
+                        ///< Key size in bits
     size_t proof_size{256};                              ///< Proof size in bits
     size_t signature_size{256};                          ///< Signature size in bits
     size_t hash_size{256};                              ///< Hash size in bits

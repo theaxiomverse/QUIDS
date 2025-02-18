@@ -17,11 +17,11 @@ void applyControlledOperation(QuantumState& state,
                             size_t control, 
                             size_t target,
                             const Eigen::Matrix2cd& operation) {
-    if (control >= state.get_num_qubits() || target >= state.get_num_qubits()) {
+    if (control >= state.getNumQubits() || target >= state.getNumQubits()) {
         throw std::out_of_range("Qubit indices out of range");
     }
 
-    size_t dim = 1ULL << state.get_num_qubits();
+    size_t dim = 1ULL << state.getNumQubits();
     size_t control_mask = 1ULL << control;
     size_t target_mask = 1ULL << target;
 
@@ -45,13 +45,13 @@ void applyToffoli(QuantumState& state,
                  size_t control1, 
                  size_t control2, 
                  size_t target) {
-    if (control1 >= state.get_num_qubits() || 
-        control2 >= state.get_num_qubits() || 
-        target >= state.get_num_qubits()) {
+    if (control1 >= state.getNumQubits() || 
+        control2 >= state.getNumQubits() || 
+        target >= state.getNumQubits()) {
         throw std::out_of_range("Qubit indices out of range");
     }
 
-    size_t dim = 1ULL << state.get_num_qubits();
+    size_t dim = 1ULL << state.getNumQubits();
     size_t control1_mask = 1ULL << control1;
     size_t control2_mask = 1ULL << control2;
     size_t target_mask = 1ULL << target;
@@ -67,11 +67,11 @@ void applyToffoli(QuantumState& state,
 }
 
 void applySwap(QuantumState& state, size_t qubit1, size_t qubit2) {
-    if (qubit1 >= state.get_num_qubits() || qubit2 >= state.get_num_qubits()) {
+    if (qubit1 >= state.getNumQubits() || qubit2 >= state.getNumQubits()) {
         throw std::out_of_range("Qubit indices out of range");
     }
 
-    size_t dim = 1ULL << state.get_num_qubits();
+    size_t dim = 1ULL << state.getNumQubits();
     size_t mask1 = 1ULL << qubit1;
     size_t mask2 = 1ULL << qubit2;
 

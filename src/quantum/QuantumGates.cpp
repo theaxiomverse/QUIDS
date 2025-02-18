@@ -31,7 +31,7 @@ Eigen::Matrix4cd cnot() {
 
 bool detectErrors(const ::quids::quantum::QuantumState& state) {
     // Simple error detection using parity checks
-    const auto& vec = state.get_state_vector();
+    const auto& vec = state.getStateVector();
     bool has_error = false;
     
     for (Eigen::Index i = 0; i < vec.size(); i++) {
@@ -45,8 +45,8 @@ bool detectErrors(const ::quids::quantum::QuantumState& state) {
 }
 
 double calculateFidelity(const ::quids::quantum::QuantumState& state1, const ::quids::quantum::QuantumState& state2) {
-    const auto& vec1 = state1.get_state_vector();
-    const auto& vec2 = state2.get_state_vector();
+    const auto& vec1 = state1.getStateVector();
+    const auto& vec2 = state2.getStateVector();
     
     if (vec1.size() != vec2.size()) {
         throw ::std::invalid_argument("State vectors must have same dimension");

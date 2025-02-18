@@ -286,6 +286,17 @@ QuantumState::QuantumState(const VectorXcd& state_vector)
     impl_->normalize();
 }
 
+
+
+// Conversion operators
+QuantumState::operator const StateVector&() const noexcept {
+    return impl_->getStateVector();
+}
+
+QuantumState::operator StateVector&() noexcept {
+    return impl_->state_vector_;
+}
+
 // Copy and move operations
 QuantumState::QuantumState(const QuantumState& other) : impl_(std::make_unique<Impl>(*other.impl_)) {}
 QuantumState::QuantumState(QuantumState&&) noexcept = default;
@@ -349,11 +360,7 @@ bool QuantumState::isValid() const noexcept {
     return impl_->isValid();
 }
 
-QuantumState::QuantumState(const Eigen::VectorXcd& state_vector) 
-    : impl_(std::make_unique<Impl>(static_cast<std::size_t>(std::log2(state_vector.size())))) {
-    impl_->state_vector_ = state_vector;
-    impl_->normalize();
-}
+
 
 
 const Eigen::VectorXcd& QuantumState::getStateVector() const noexcept {

@@ -66,7 +66,7 @@ def test_sha3_512_hash():
         msg = gen_rand_bytes(i)
 
         dig0 = sha3.sha3_512_hash(msg)
-        dig1 = hashlib.sha3_512(msg).digest()
+        dig1 = hashlib.sha512(msg).digest()
 
         assert (
             dig0 == dig1
@@ -176,7 +176,7 @@ def test_bench_sha3_384_hashlib(benchmark):
 
     @benchmark
     def compute():
-        return hashlib.sha3_384(msg).digest()
+        return hashlib.sha512(msg).digest()
 
 
 @pytest.mark.benchmark(group="sha3-512", min_rounds=5, disable_gc=True, warmup=True)

@@ -11,9 +11,9 @@
 namespace quids::quantum {
 
 // Common type declarations from quids namespace
-using quids::size_t;
-using quids::vector;
-using quids::optional;
+using std::size_t;
+using std::vector;
+using std::optional;
 
 /**
  * @brief Quantum consensus protocols and utilities

@@ -26,7 +26,7 @@ using ::std::log2;
 
 
 
-double calculateFidelity(const QuantumState& state1, const QuantumState& state2) {
+double calculateFidelity(const QuantumState& state1, const QuantumState& state2) noexcept {
     if (state1.size() != state2.size()) {
         throw ::std::invalid_argument("States must have same dimension");
     }
@@ -38,7 +38,7 @@ double calculateFidelity(const QuantumState& state1, const QuantumState& state2)
     return ::std::abs(overlap * ::std::conj(overlap));
 }
 
-double calculateEntanglement(const QuantumState& state) {
+double calculateEntanglement(const QuantumState& state) noexcept {
     const size_t dim = state.size();
     const size_t n_qubits = static_cast<size_t>(::std::log2(dim));
     const Eigen::VectorXcd& state_vector = state.getStateVector();
@@ -112,7 +112,7 @@ QuantumState correctErrors(const QuantumState& state, const ErrorSyndrome& syndr
     return QuantumState(corrected_vector);
 }
 
-double calculateQuantumSecurity(const QuantumState& state) {
+double calculateQuantumSecurity(const QuantumState& state) noexcept {
     if (state.size() < 2) return 0.0;
     
     // Use SIMD for entropy calculation

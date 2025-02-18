@@ -24,6 +24,7 @@ find_library(ZSTD_LIBRARY
     REQUIRED
 )
 
+find_package(EIGEN3 REQUIRED)
 # Set RocksDB paths
 set(ROCKSDB_ROOT "/usr/local/Cellar/rocksdb/9.10.0")
 set(ROCKSDB_INCLUDE_DIR "${ROCKSDB_ROOT}/include")

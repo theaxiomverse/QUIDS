@@ -196,14 +196,14 @@ QuantumSignature QuantumCrypto::sign(const std::vector<uint8_t>& data,
         {
             QuantumSignature sig{};  
             sig.sig_data = sign(data, params).sig_data;
-            return sig;
+            sig.scheme = params.sig_scheme;
         }
         
         #pragma omp section
         {
             QuantumSignature sig{};  
             sig.proof = utils::generateSignatureProof(sig.sig_data, params.key);
-            return sig;
+                sig.scheme = params.sig_scheme;
         }
     }
 

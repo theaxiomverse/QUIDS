@@ -1,0 +1,16 @@
+#pragma once
+
+// Compiler feature support
+#cmakedefine HAVE_CONCEPTS
+#cmakedefine HAVE_COROUTINES  
+#cmakedefine HAVE_RANGES
+
+// Version information
+#define QUIDS_VERSION "${VERSION_STRING}"
+#define QUIDS_GIT_BRANCH "${GIT_BRANCH}"
+#define QUIDS_GIT_COMMIT "${GIT_COMMIT_HASH}"
+
+// Build configuration
+#cmakedefine ENABLE_TESTS
+#cmakedefine ENABLE_BENCHMARKS
+#cmakedefine USE_SANITIZERS

@@ -15,6 +15,7 @@ graph TD
         AIBlock --> |optimizes| QPolicy[QuantumPolicyNetwork]
         AIBlock --> |validates| Consensus[ConsensusModule]
     end
+    
 
     subgraph Quantum Layer
         QState --> |implements| QCircuit[QuantumCircuit]

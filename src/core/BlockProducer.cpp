@@ -14,6 +14,7 @@ BlockProducer::BlockProducer(const BlockProducerConfig& config)
         .batch_size = config.max_transactions,
         .num_parallel_verifiers = 4,
         .quantum_circuit_depth = 20,
+
         .enable_error_correction = true
     }) {}
 
