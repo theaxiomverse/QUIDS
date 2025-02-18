@@ -18,7 +18,7 @@ set(TEST_SOURCES
 add_executable(enhanced_ml_tests ${TEST_SOURCES})
 target_link_libraries(enhanced_ml_tests
     PRIVATE
-    quids_core
+    quids
     GTest::GTest
     GTest::Main
     fmt::fmt
@@ -49,7 +49,7 @@ add_executable(rollup_benchmarks
 
 target_link_libraries(rollup_benchmarks
     PRIVATE
-    quids_core
+    quids
     GTest::GTest
     GTest::Main
     fmt::fmt

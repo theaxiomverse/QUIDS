@@ -1,14 +1,18 @@
-#ifndef QUIDS_QUANTUM_QUANTUM_OPERATIONS_HPP
-#define QUIDS_QUANTUM_QUANTUM_OPERATIONS_HPP
+#ifndef QUIDS_QUANTUM_OPERATIONS_HPP
+#define QUIDS_QUANTUM_OPERATIONS_HPP
 
-#include "StdNamespace.hpp"
 #include "QuantumTypes.hpp"
 #include "QuantumState.hpp"
-#include <Eigen/Dense>
 #include <complex>
-#include <vector>
+#include <cstddef>
 
 namespace quids::quantum {
+
+using GateMatrix = ::quids::quantum::GateMatrix;
+using OperatorMatrix = ::quids::quantum::OperatorMatrix;
+using QuantumState = ::quids::quantum::QuantumState;
+
+namespace operations {
 
 /**
  * @brief Namespace containing quantum operations and gates
@@ -17,7 +21,6 @@ namespace quids::quantum {
  * gates and operations used in quantum computation. All gates are represented
  * as unitary matrices operating on quantum states.
  */
-namespace operations {
 
 ///@{
 /** @name Single-qubit Operations
@@ -147,9 +150,9 @@ namespace operations {
  */
 [[nodiscard]] OperatorMatrix controlGate(
     const OperatorMatrix& gate,
-    quids::size_t numQubits,
-    quids::size_t control,
-    quids::size_t target);
+    std::size_t numQubits,
+    std::size_t control,
+    std::size_t target);
 
 /**
  * @brief Applies a gate to a quantum state
@@ -160,7 +163,7 @@ namespace operations {
 void applyGate(
     QuantumState& state,
     const GateMatrix& gate,
-    quids::size_t target);
+    std::size_t target);
 
 /**
  * @brief Applies a controlled gate to a quantum state
@@ -172,12 +175,12 @@ void applyGate(
 void applyControlledGate(
     QuantumState& state,
     const GateMatrix& gate,
-    quids::size_t control,
-    quids::size_t target);
+    std::size_t control,
+    std::size_t target);
 
 ///@}
 
 } // namespace operations
 } // namespace quids::quantum
 
-#endif // QUIDS_QUANTUM_QUANTUM_OPERATIONS_HPP 
+#endif // QUIDS_QUANTUM_OPERATIONS_HPP 

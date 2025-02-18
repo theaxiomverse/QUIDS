@@ -5,49 +5,52 @@
 #include <vector>
 #include <memory>
 
-namespace quids::quantum {
-    class QuantumState;
-}
-
 namespace quids::neural {
-
-namespace detail {
-    struct QuantumPolicyNetworkState;
-}
 
 class QuantumPolicyNetwork : public BaseQuantumNetwork {
 public:
-    QuantumPolicyNetwork(std::size_t stateSize, std::size_t actionSize, std::size_t numQubits);
+    explicit QuantumPolicyNetwork(size_t inputSize, size_t outputSize, size_t numQubits);
     ~QuantumPolicyNetwork() override;
 
-    // Disable copy operations
+    // Delete copy operations
     QuantumPolicyNetwork(const QuantumPolicyNetwork&) = delete;
     QuantumPolicyNetwork& operator=(const QuantumPolicyNetwork&) = delete;
 
-    // Enable move operations
-    QuantumPolicyNetwork(QuantumPolicyNetwork&&) noexcept = default;
-    QuantumPolicyNetwork& operator=(QuantumPolicyNetwork&&) noexcept = default;
+    // Delete move operations
+    QuantumPolicyNetwork(QuantumPolicyNetwork&&) = delete;
+    QuantumPolicyNetwork& operator=(QuantumPolicyNetwork&&) = delete;
 
-    // Parameter access (from BaseQuantumNetwork)
-    double getParameter(std::size_t index) const override;
-    void setParameter(std::size_t index, double value) override;
-    std::size_t getNumParameters() const override;
+    // Parameter access
+    [[nodiscard]] double getParameter(size_t index) const override;
+    void setParameter(size_t index, double value) override;
 
-    // Network operations (from BaseQuantumNetwork)
+    // Network operations
     void forward() override;
     void backward() override;
-    std::vector<double> getGradients() const override;
+    [[nodiscard]] std::vector<double> calculateQuantumGradients() const override;
+    void loadNetworkState(const std::string& filePath) override;
+    void saveNetworkState(const std::string& filePath) const override;
 
     // Policy-specific operations
-    std::vector<double> forward(const quantum::QuantumState& state);
-    void updatePolicy(const std::vector<double>& advantages);
-    double getPolicyEntropy() const;
+    void forward(const std::vector<double>& state);
+    void backward(const std::vector<double>& gradOutput);
+    void updatePolicy(const std::vector<double>& prediction);
+    [[nodiscard]] double getPolicyEntropy() const;
+    [[nodiscard]] std::vector<double> getQuantumParameters() const override;
+    [[nodiscard]] size_t getNumParameters() const override;
+    [[nodiscard]] std::vector<double> getGradients() const override;
+    [[nodiscard]] std::vector<double> getPolicy() const;
+    [[nodiscard]] std::vector<double> getCurrentState() const;
+    [[nodiscard]] std::vector<double> getActionProbabilities() const;
 
+    void updatePolicy(const std::vector<double>& rewards, double learningRate);
+    void updatePolicy(const std::vector<double>& rewards, double learningRate, double discountFactor);
+    void resetNetworkState();
 private:
-    struct Impl;  // Forward declare the implementation struct
+    struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace quids::neural 
+} // namespace quids::neural
 
 #endif // QUIDS_NEURAL_QUANTUM_POLICY_NETWORK_HPP 

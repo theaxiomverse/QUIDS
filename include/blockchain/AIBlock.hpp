@@ -1,213 +1,101 @@
+#ifndef QUIDS_BLOCKCHAIN_AI_BLOCK_HPP
+#define QUIDS_BLOCKCHAIN_AI_BLOCK_HPP
 
-
+#include "blockchain/Block.hpp"
 #include "blockchain/Transaction.hpp"
-#include "quantum/QuantumState.hpp"
-#include "quantum/QuantumTypes.hpp"
-#include "rl/QuantumRLAgent.hpp"
-#include "neural/QuantumPolicyNetwork.hpp"
-#include "memory/MemoryPool.hpp"
-#include "state/LockFreeStateManager.hpp"
-#include "consensus/QuantumConsensus.hpp"
-#include "StdNamespace.hpp"
-#include <vector>
+#include "Types.hpp"
+#include <atomic>
+#include <mutex>
 #include <memory>
 #include <chrono>
-#include <mutex>
-#include <optional>
-#include <atomic>
 #include <array>
-#include "blockchain/Block.hpp"
-
-namespace quids {
-    namespace memory { template<typename T> class MemoryPool; }
-    namespace state { class LockFreeStateManager; }
-    namespace consensus { class QuantumConsensusModule; }
-    namespace rl { class QuantumRLAgent; }
-}
-
-/**
- * @file AIBlock.hpp
- * @brief AI-enhanced blockchain block implementation with quantum capabilities
- * 
- * This file implements an advanced block type that uses AI and quantum computing
- * to optimize transaction ordering, security, and consensus mechanisms.
- */
+#include <optional>
+#include <vector>
+#include <functional>
 
 namespace quids::blockchain {
 
-class Block;
-
-// Type aliases for commonly used types
-using ByteArray = std::array<uint8_t, 32>;
-using ByteVector = std::vector<uint8_t>;
-template<typename T>
-using Vector = std::vector<T>;
-template<typename T>
-using Optional = std::optional<T>;
-
-using TimePoint = std::chrono::system_clock::time_point;
-using Mutex = std::mutex;
-
-// Component type aliases
-using MemoryPool = memory::MemoryPool<Transaction>;
-using StateManager = state::LockFreeStateManager;
-using ConsensusModule = consensus::QuantumConsensusModule;
-using RLAgent = rl::QuantumRLAgent;
-using Transaction = Transaction;
-using QuantumState = quantum::QuantumState;
-
-
-
-
-/**
- * @brief Configuration for AI-enhanced block behavior
- * 
- * Contains parameters that control the AI model size, quantum circuit depth,
- * and various optimization flags for block processing.
- */
-struct AIBlockConfig {
-    size_t modelInputSize{256};        ///< Neural network input dimension
-    size_t modelOutputSize{64};        ///< Neural network output dimension
-    size_t numQubits{8};              ///< Number of qubits for quantum operations
-    double learningRate{0.001};              ///< Model learning rate
-    size_t batchSize{32};             ///< Training batch size
-    bool useQuantumOptimization{true};       ///< Enable quantum-enhanced optimizations
-    size_t maxTransactionsPerBlock{1000}; ///< Maximum transactions per block
-    double targetBlockTime{15.0};            ///< Target block time in seconds
-    size_t quantumCircuitDepth{4};    ///< Depth of quantum circuits
-    bool useErrorCorrection{true};           ///< Enable quantum error correction
-    bool useParallelProcessing{true};        ///< Enable parallel processing
-    bool useSIMD{true};                      ///< Enable SIMD optimizations
+struct AIMetrics {
+    ::std::atomic<double> throughput{0.0};
+    ::std::atomic<double> latency{0.0};
+    ::std::atomic<double> quantumAdvantage{0.0};
+    ::std::chrono::system_clock::time_point lastUpdateTime{::std::chrono::system_clock::now()};
 };
 
-/**
- * @brief AI-enhanced blockchain block with quantum capabilities
- * 
- * Extends the base Block class with AI and quantum computing features for
- * optimized transaction processing, enhanced security, and improved consensus.
- */
+struct AIBlockConfig {
+    ::std::size_t maxTransactionsPerBlock{1000};
+    ::std::size_t numQubits{8};
+    ::std::size_t modelInputSize{16};
+    ::std::size_t modelOutputSize{8};
+    ::std::size_t batchSize{128};
+    ::std::size_t quantumCircuitDepth{4};
+    double learningRate{0.001};
+    bool useQuantumOptimization{true};
+    bool useParallelProcessing{true};
+    bool useSIMD{true};
+};
 
 class AIBlock : public Block {
 public:
-    // Forward declare Impl
-    class Impl;
-
-    /**
-     * @brief Constructs an AI-enhanced block
-     * @param config Configuration parameters for the block
-     */
     explicit AIBlock(const AIBlockConfig& config);
-    ~AIBlock() = default;
+    ~AIBlock() override;
 
-    // Disable copy
-    AIBlock(const AIBlock&) = delete;
-    AIBlock& operator=(const AIBlock&) = delete;
-
-    // Allow move
-    AIBlock(AIBlock&&) noexcept = default;
-    AIBlock& operator=(AIBlock&&) noexcept = default;
-
-    // Override Block virtual methods
-    bool verify() const;
+    // Block interface implementation
     bool addTransaction(const Transaction& tx) override;
-    bool verifyBlock() const override;
-    virtual std::array<uint8_t, 32> computeHash() const;
-    virtual std::array<uint8_t, 32> computeMerkleRoot() const;
-    virtual std::vector<uint8_t> serialize() const;  
-    virtual void deserialize(const std::vector<uint8_t>& data);
+    size_t getTransactionCount() const override;
+    const Transaction& getTransaction(size_t index) const override;
+    bool verifyTransactions() const override;
+    bool verify() const override;
+    ByteArray hash() const override;
+    void computeHash() override;
+    void computeMerkleRoot() override;
+    void applyQuantumOptimization() override;
+    double calculateQuantumSecurityScore() const override;
+    void serialize(ByteVector& out) const override;
+    bool deserialize(const ByteVector& data) override;
 
-    // AI-specific methods with optimizations
-    void updateModel(const std::vector<Transaction>& transactions);
-    std::vector<Transaction> suggestOptimalTransactionOrder() const;
-    double getModelConfidence() const;
-    std::optional<double> predictOptimalGasPrice() const;
-    
-    // Quantum integration
-    quantum::QuantumState getQuantumState() const;
-    void setQuantumState(const quantum::QuantumState& state);
-    double calculateQuantumSecurityScore() const;
-    
-    // Optimized processing
-    void processBlockParallel();
-    void finalizeBlockZK();
+    // AI-specific methods
+    void optimize();
+    ::std::vector<double> extractFeatures(const Transaction& tx) const;
+    double computeScore() const;
 
-  
-    
-    /**
-     * @brief Performance and state metrics for AI block
-     * 
-     * Cache-aligned structure containing atomic metrics for
-     * model performance, quantum state, and block processing.
-     */
-    struct alignas(64) AIMetrics {
-        std::atomic<double> modelLoss{0.0};           ///< Current model loss
-        std::atomic<double> predictionAccuracy{0.0};  ///< Prediction accuracy
-        std::atomic<double> quantumAdvantage{0.0};    ///< Quantum speedup factor
-        std::atomic<double> securityScore{0.0};       ///< Security metric
-        std::atomic<double> transactionEfficiency{0.0}; ///< Transaction processing efficiency
-        std::atomic<double> networkHealth{0.0};       ///< Network health score
-        std::atomic<double> throughput{0.0};          ///< Transactions per second
-        std::atomic<double> latency{0.0};             ///< Processing latency
-        std::atomic<double> energyUsage{0.0};         ///< Energy consumption
-        std::atomic<int> validatorCount{0};           ///< Active validators
-        std::atomic<size_t> trainingSteps{0};         ///< Training iterations
-        TimePoint lastUpdateTime;                ///< Last update timestamp
-        quantum::QuantumSecurityMetrics quantumMetrics;  ///< Quantum security metrics
-        std::vector<double> historicalPredictions;     ///< Prediction history
-        std::vector<double> historicalAccuracy;        ///< Accuracy history
-    };
-    
-    const AIMetrics& getMetrics() const;
+    // AIBlock specific methods
+    const ::quids::blockchain::AIMetrics& getMetrics() const;
     AIBlockConfig getConfig() const;
 
-private:
-    // Private implementation
-    class Impl {
-    public:
-        explicit Impl(const AIBlockConfig& config);
-        AIMetrics metrics_;
-        AIBlockConfig config_;
-        quantum::QuantumState quantumState_;
-        neural::QuantumPolicyNetwork policyNetwork_;
-        std::vector<Transaction> transactions_;
-    private:
-        void initializeQuantumCircuit();
-    };
-
-    std::unique_ptr<Impl> impl_;
-
-    // Optimized components
-    std::unique_ptr<MemoryPool> txPool_;
-    std::unique_ptr<StateManager> stateManager_;
-    std::unique_ptr<ConsensusModule> consensus_;
-    std::unique_ptr<RLAgent> agent_;
-    
-    // Cache-aligned state
-    std::array<double, 8> stateBuffer_;
-
-    // Helper methods
-    void trainOnBatch(const std::vector<Transaction>& batch);
+protected:
+    void processBlockParallel();
+    void processTransactionsSIMD(const ::std::vector<::std::reference_wrapper<const Transaction>>& batch);
+    void applyQuantumCircuit(QuantumState& state) const;
+    double computeTransactionEntropy() const;
     void updateMetrics();
     void optimizeParameters();
-    std::vector<double> extractFeatures(const Transaction& tx) const;
-    void applyQuantumCircuit(quantum::QuantumState& state) const;
-    double computeTransactionEntropy() const;
-    void processTransactionsSIMD(const std::vector<Transaction>& batch);
-    void applyOptimizationsParallel();
-    
-    // Thread safety
-    mutable Mutex mutex_;
-    
-    // Caching
-    mutable Optional<ByteArray> cachedHash_;
-    mutable Optional<ByteArray> cachedMerkleRoot_;
     void invalidateCache();
 
-    // Constants
-    static constexpr size_t CACHE_LINE_SIZE = 64;
-    static constexpr size_t SIMD_WIDTH = 8;
-    static constexpr size_t MAX_BATCH_SIZE = 1024;
+private:
+    class Impl;
+    ::std::unique_ptr<Impl> impl_;
+    ::std::unique_ptr<memory::MemoryPool<Transaction>> txPool_;
+    ::std::unique_ptr<state::LockFreeStateManager> stateManager_;
+    ::std::unique_ptr<consensus::QuantumConsensusModule> consensusModule_;
+    ::std::unique_ptr<rl::QuantumRLAgent> rlAgent_;
+    ::std::unique_ptr<neural::QuantumPolicyNetwork> policyNetwork_;
+    ::std::unique_ptr<neural::QuantumValueNetwork> valueNetwork_;
+    ::std::unique_ptr<quantum::QuantumState> quantumState_;
+    ::std::unique_ptr<quantum::QuantumCircuit> quantumCircuit_;
+    mutable ::std::mutex mutex_;
+    ::std::optional<ByteArray> cachedHash_;
+    ::std::optional<ByteArray> cachedMerkleRoot_;
+    uint64_t blockNumber_{0};
+    ByteArray previousHash_{};
+    ByteArray merkleRoot_{};
+    ::std::chrono::system_clock::time_point timestamp_{::std::chrono::system_clock::now()};
+    uint64_t nonce_{0};
+    uint64_t difficulty_{0};
+    ::std::vector<double> stateBuffer_;
 };
 
 } // namespace quids::blockchain
+
+#endif // QUIDS_BLOCKCHAIN_AI_BLOCK_HPP
 

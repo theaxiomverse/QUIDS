@@ -1,5 +1,5 @@
-#ifndef QUIDS_QUANTUM_QUANTUM_TYPES_HPP
-#define QUIDS_QUANTUM_QUANTUM_TYPES_HPP
+#ifndef QUIDS_QUANTUM_TYPES_HPP
+#define QUIDS_QUANTUM_TYPES_HPP
 
 #include <Eigen/Dense>
 #include <cstdint>
@@ -7,6 +7,8 @@
 #include <complex>
 #include <unordered_map>
 #include <functional>
+#include <string>
+#include <cstddef>
 
 namespace quids::quantum {
 
@@ -15,7 +17,7 @@ namespace quids::quantum {
  */
 
 /// Complex number type used throughout quantum computations
-using Complex = std::complex<double>;
+using Complex = ::std::complex<double>;
 
 /// State vector type representing quantum states
 using StateVector = Eigen::VectorXcd;
@@ -24,7 +26,7 @@ using StateVector = Eigen::VectorXcd;
 using OperatorMatrix = Eigen::MatrixXcd;
 
 /// Vector type for measurement probabilities
-using ProbabilityVector = std::vector<double>;
+using ProbabilityVector = ::std::vector<double>;
 
 /// Gate matrix type (2x2 complex matrix)
 using GateMatrix = Eigen::Matrix2cd;
@@ -45,14 +47,63 @@ enum class GateType {
     CUSTOM      ///< Custom unitary gate
 };
 
+/// Map type for storing gate parameters
+using GateParameters = ::std::unordered_map<::std::string, double>;
+
+/// Function type for custom gate operations
+using GateFunction = ::std::function<GateMatrix(const GateParameters&)>;
+
+/// Type for qubit indices
+using QubitIndex = ::std::size_t;
+
+/// Vector of qubit indices
+using QubitIndices = ::std::vector<QubitIndex>;
+
+/// Map of gate names to their matrices
+using GateMap = ::std::unordered_map<::std::string, GateMatrix>;
+
+/// Map of gate names to their parameters
+using GateParameterMap = ::std::unordered_map<::std::string, GateParameters>;
+
+/// Map of gate names to their functions
+using GateFunctionMap = ::std::unordered_map<::std::string, GateFunction>;
+
+/// Vector of gate operations
+using GateOperations = ::std::vector<::std::pair<GateType, GateParameters>>;
+
+/// Vector of measurement results
+using MeasurementResults = ::std::vector<::std::pair<QubitIndex, bool>>;
+
+/// Map of measurement probabilities
+using MeasurementProbabilities = ::std::unordered_map<::std::string, double>;
+
+/// Vector of complex amplitudes
+using AmplitudeVector = ::std::vector<Complex>;
+
+/// Map of basis states to amplitudes
+using BasisStateMap = ::std::unordered_map<::std::string, Complex>;
+
+/// Vector of quantum circuit layers
+using CircuitLayers = ::std::vector<GateOperations>;
+
+/// Map of circuit parameters
+using CircuitParameters = ::std::unordered_map<::std::string, double>;
+
+/// Vector of circuit metrics
+using CircuitMetrics = ::std::vector<double>;
+
+/// Map of circuit statistics
+using CircuitStatistics = ::std::unordered_map<::std::string, double>;
+
 /**
  * @brief Structure defining a quantum gate operation
  */
 struct GateOperation {
-    GateType type{GateType::HADAMARD};              ///< Type of gate to apply
-    std::vector<std::size_t> qubits{};              ///< Target qubits
-    std::vector<double> parameters{};                ///< Gate parameters (if any)
-    OperatorMatrix custom_matrix{};                  ///< Custom gate matrix (if type is CUSTOM)
+    std::size_t target;
+    std::size_t control;
+    GateMatrix matrix;
+    std::string name;
+    bool isControlled{false};
 };
 
 /**
@@ -91,8 +142,13 @@ struct QuantumSecurityMetrics {
 /// Constants for quantum operations
 namespace constants {
     constexpr double QUANTUM_ERROR_THRESHOLD = 1e-6;     ///< Error threshold for quantum operations
+    constexpr double QUANTUM_ENTANGLEMENT_THRESHOLD = 1e-5;
     constexpr std::size_t DEFAULT_QUBIT_COUNT = 8;       ///< Default number of qubits
-    constexpr std::size_t MAX_ENTANGLEMENT_DEPTH = 100;  ///< Maximum entanglement depth
+    constexpr std::size_t MAX_QUBIT_COUNT = 32;
+    constexpr std::size_t DEFAULT_CIRCUIT_DEPTH = 4;
+    constexpr std::size_t MAX_CIRCUIT_DEPTH = 1000;
+    constexpr double DEFAULT_LEARNING_RATE = 0.001;
+    constexpr double MIN_FIDELITY = 0.99;
 }
 
 /// Common quantum gates as constant matrices
@@ -137,6 +193,11 @@ enum class Basis {
     BELL           ///< Bell state basis
 };
 
+// Forward declarations
+class QuantumState;
+class QuantumCircuit;
+class QuantumGate;
+
 } // namespace quids::quantum
 
-#endif // QUIDS_QUANTUM_QUANTUM_TYPES_HPP
+#endif // QUIDS_QUANTUM_TYPES_HPP

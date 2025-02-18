@@ -80,6 +80,12 @@ public:
         return "DILITHIUM8x7";
     }
 
+    std::string signMessage(const std::string& message) {
+        return std::string(sign(std::vector<uint8_t>(message.begin(), message.end())).begin(), sign(std::vector<uint8_t>(message.begin(), message.end())).end());
+    }   
+
+   
+
 private:
     std::unique_ptr<Botan::Dilithium_PrivateKey> m_private_key;
     std::unique_ptr<Botan::Public_Key> m_public_key;
@@ -99,6 +105,10 @@ std::vector<uint8_t> DilithiumSigner::getPublicKey() const {
 std::vector<uint8_t> DilithiumSigner::getPrivateKey() const {
     return impl_->getPrivateKey();
 }
+
+std::string DilithiumSigner::Impl::signMessage(const std::string& message) {
+    return signMessage(message);
+}   
 
 std::vector<uint8_t> DilithiumSigner::sign(const std::vector<uint8_t>& message) {
     return impl_->sign(message);

@@ -1,15 +1,21 @@
-#ifndef QUIDS_QUANTUM_QUANTUM_CIRCUIT_HPP
-#define QUIDS_QUANTUM_QUANTUM_CIRCUIT_HPP
+#ifndef QUIDS_QUANTUM_CIRCUIT_HPP
+#define QUIDS_QUANTUM_CIRCUIT_HPP
 
 #include "QuantumTypes.hpp"
 #include "QuantumState.hpp"
+#include "QuantumGates.hpp"
 #include "QuantumOperations.hpp"
-#include "StdNamespace.hpp"
+//#include "StdNamespace.hpp"
 #include <vector>
 #include <memory>
 #include <string>
+#include <cstddef>
 
 namespace quids::quantum {
+
+using GateType = ::quids::quantum::GateType;
+using QuantumState = ::quids::quantum::QuantumState;
+using OperatorMatrix = ::quids::quantum::OperatorMatrix;
 
 /**
  * @brief Represents a quantum circuit for quantum computation
@@ -28,7 +34,7 @@ public:
      * @param numQubits Number of qubits in the circuit
      * @throws std::invalid_argument if numQubits is 0
      */
-    explicit QuantumCircuit(quids::size_t numQubits);
+    explicit QuantumCircuit(std::size_t numQubits);
 
     // Delete copy operations
     QuantumCircuit(const QuantumCircuit&) = delete;
@@ -50,7 +56,7 @@ public:
      * @throws std::out_of_range if qubit index is invalid
      * @throws std::invalid_argument if gate type is invalid
      */
-    void addGate(GateType type, quids::size_t qubit);
+    void addGate(GateType type, std::size_t qubit);
 
     /**
      * @brief Adds a controlled gate to the circuit
@@ -60,7 +66,7 @@ public:
      * @throws std::out_of_range if qubit indices are invalid
      * @throws std::invalid_argument if gate type is invalid
      */
-    void addControlledGate(GateType type, quids::size_t control, quids::size_t target);
+    void addControlledGate(GateType type, std::size_t control, std::size_t target);
 
     /**
      * @brief Adds a custom gate to the circuit
@@ -69,14 +75,14 @@ public:
      * @throws std::out_of_range if qubit index is invalid
      * @throws std::invalid_argument if gate matrix is not unitary
      */
-    void addCustomGate(const OperatorMatrix& gate, quids::size_t qubit);
+    void addCustomGate(const OperatorMatrix& gate, std::size_t qubit);
 
     /**
      * @brief Adds a measurement operation to the circuit
      * @param qubit Qubit to measure
      * @throws std::out_of_range if qubit index is invalid
      */
-    void addMeasurement(quids::size_t qubit);
+    void addMeasurement(std::size_t qubit);
     
     /**
      * @brief Executes the circuit on an initial state
@@ -90,7 +96,7 @@ public:
      * @brief Measures all qubits in the circuit
      * @return Vector of measurement results
      */
-    [[nodiscard]] quids::vector<bool> measure() const;
+    [[nodiscard]] std::vector<bool> measure() const;
     
     /**
      * @brief Gets the depth of the circuit
@@ -151,4 +157,4 @@ private:
 
 } // namespace quids::quantum
 
-#endif // QUIDS_QUANTUM_QUANTUM_CIRCUIT_HPP
+#endif // QUIDS_QUANTUM_CIRCUIT_HPP

@@ -1,50 +1,48 @@
-# Find BLAKE3 manually
-find_path(BLAKE3_INCLUDE_DIR blake3.h
-    PATHS /usr/include
-    REQUIRED
-)
-find_library(BLAKE3_LIBRARY
-    NAMES blake3
-    PATHS /usr/lib
-    REQUIRED
+# Ubuntu specific settings
+
+# Set vendor root path 
+set(VENDOR_ROOT "/usr" CACHE PATH "Root directory for vendor libraries")
+
+# Configure standard paths
+list(APPEND CMAKE_PREFIX_PATH ${VENDOR_ROOT})
+list(APPEND CMAKE_PREFIX_PATH "/usr/local")
+
+# Library paths
+set(LIB_PATHS
+    ${VENDOR_ROOT}/lib
+    ${VENDOR_ROOT}/lib/x86_64-linux-gnu  
+    /usr/local/lib
 )
 
-# Find zstd manually
-find_path(ZSTD_INCLUDE_DIR zstd.h
-    PATHS /usr/include
-    REQUIRED
-)
-find_library(ZSTD_LIBRARY
-    NAMES zstd
-    PATHS /usr/lib
-    REQUIRED
+# Add library search paths
+list(APPEND CMAKE_LIBRARY_PATH ${LIB_PATHS})
+
+# Include paths
+set(INCLUDE_PATHS 
+    ${VENDOR_ROOT}/include
+    /usr/local/include
 )
 
-# Set RocksDB paths
-set(ROCKSDB_ROOT "/usr")
-set(ROCKSDB_INCLUDE_DIR "${ROCKSDB_ROOT}/include")
-set(ROCKSDB_LIBRARY_DIR "${ROCKSDB_ROOT}/lib")
+# Add include search paths
+list(APPEND CMAKE_INCLUDE_PATH ${INCLUDE_PATHS})
 
-# Set GMP paths
-set(GMP_ROOT "/usr")
-set(GMP_INCLUDE_DIR "${GMP_ROOT}/include")
-set(GMP_LIBRARY_DIR "${GMP_ROOT}/lib")
+# Configure pkg-config
+set(ENV{PKG_CONFIG_PATH} "${VENDOR_ROOT}/lib/pkgconfig:${VENDOR_ROOT}/lib/x86_64-linux-gnu/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 
-include_directories(${ROCKSDB_INCLUDE_DIR})
-find_library(ROCKSDB_LIBRARY
-    NAMES rocksdb
-    PATHS ${ROCKSDB_LIBRARY_DIR}
-    REQUIRED
-)
-if(NOT ROCKSDB_LIBRARY)
-    message(FATAL_ERROR "RocksDB library not found")
+# Support for optional components
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(MINIUPNPC miniupnpc)
+    pkg_check_modules(NATPMP libnatpmp)
 endif()
 
-find_library(GMP_LIBRARY
-    NAMES gmp
-    PATHS ${GMP_LIBRARY_DIR}
-    REQUIRED
-)
-if(NOT GMP_LIBRARY)
-    message(FATAL_ERROR "GMP library not found")
-endif()
+# Print configuration
+message(STATUS "Using vendor root: ${VENDOR_ROOT}")
+message(STATUS "Library paths:")
+foreach(path ${CMAKE_LIBRARY_PATH})
+    message(STATUS "  ${path}")
+endforeach()
+message(STATUS "Include paths:") 
+foreach(path ${CMAKE_INCLUDE_PATH})
+    message(STATUS "  ${path}")
+endforeach()

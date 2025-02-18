@@ -20,10 +20,19 @@ namespace quids::quantum {
  * computation. It supports various quantum gates, measurements, and state
  * manipulations required for quantum algorithms.
  */
+using StateVector = Eigen::Matrix<std::complex<double>, -1, 1>;
+
 class QuantumState {
 public:
     /// Forward declaration of implementation class
     class Impl;
+
+    // Constructors
+    explicit QuantumState(const StateVector& state_vector);
+    
+    // Conversion operators
+    operator const StateVector&() const noexcept;
+    operator StateVector&() noexcept;
 
     /**
      * @brief Default constructor creating a zero-qubit state
@@ -36,12 +45,7 @@ public:
      */
     explicit QuantumState(std::size_t num_qubits);
 
-    /**
-     * @brief Creates a quantum state from an existing state vector
-     * @param state_vector Eigen vector representing the quantum state
-     * @throws std::invalid_argument if state vector dimensions are invalid
-     */
-    explicit QuantumState(const Eigen::VectorXcd& state_vector);
+
 
     /**
      * @brief Copy constructor
@@ -91,6 +95,11 @@ public:
      * @throws std::runtime_error if state is zero vector
      */
     void normalize();
+
+    /**
+     * @brief Resets the quantum state to initial state
+     */
+    void reset();
 
     /**
      * @brief Checks if the state is valid quantum state
@@ -172,6 +181,20 @@ public:
      * @throws std::invalid_argument if gate dimensions don't match state
      */
     void applyGateOptimized(const Eigen::MatrixXcd& gate);
+
+    /**
+     * @brief Applies rotation gate with specified angle
+     * @param angle Rotation angle in radians
+     */
+    void applyRotation(double angle);
+
+    /**
+     * @brief Applies rotation gate to specified qubit
+     * @param qubit Target qubit
+     * @param angle Rotation angle in radians
+     * @throws std::out_of_range if qubit is invalid
+     */
+    void applyRotation(std::size_t qubit, double angle);
 
     // Quantum metrics
     /**

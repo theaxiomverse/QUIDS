@@ -34,3 +34,4 @@
 .env
 /miniupnpc
 /build
+/cmake-build-debug

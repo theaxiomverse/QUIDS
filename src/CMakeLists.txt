@@ -1,17 +1,31 @@
-# Source files
-file(GLOB_RECURSE SOURCES
-    "blockchain/*.cpp"
-    "crypto/*.cpp"
-    "quantum/*.cpp"
-    "zkp/*.cpp"
-    "storage/*.cpp"
-    "rollup/*.cpp"
-    "evm/*.cpp"
-    "rollup/StateTransitionProof.cpp"
+# Base components with no internal dependencies
+add_subdirectory(crypto)      # Uses: OpenSSL, BLAKE3
+add_subdirectory(storage)     # Uses: RocksDB, ZSTD
+
+# Core components built in correct dependency order
+add_subdirectory(quantum)     # Uses: Eigen3
+add_subdirectory(blockchain)  # Uses: crypto, OpenSSL
+add_subdirectory(neural)      # Uses: quantum, OpenMP
+add_subdirectory(zkp)         # Uses: crypto, GMP
+
+# Generate version and feature information
+configure_file(
+    ${CMAKE_SOURCE_DIR}/include/version.hpp.in
+    ${CMAKE_BINARY_DIR}/include/quids/version.hpp
+    @ONLY
+)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/../cmake/config.h.in
+    ${CMAKE_BINARY_DIR}/include/quids/config.h 
+    @ONLY
 )
 
-# Organize source files by component
-set(CLI_SOURCES
+# Higher level components
+add_subdirectory(evm)         # Uses: blockchain, storage
+add_subdirectory(rollup)      # Uses: blockchain, zkp, storage, neural
+
+# CLI component
+add_library(quids_cli SHARED
     cli/QuidsCommand.cpp
     cli/QuidsCLI.cpp
     cli/commands/StartCommand.cpp
@@ -19,22 +33,76 @@ set(CLI_SOURCES
     cli/commands/StatusCommand.cpp
 )
 
-set(CONTROL_SOURCES
+target_include_directories(quids_cli
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(quids_cli
+    PRIVATE
+    fmt::fmt
+    spdlog::spdlog)
+
+# Control component
+add_library(quids_control SHARED
     control/QuidsControl.cpp
 )
 
-# Combine all sources
-set(QUIDS_SOURCES
-    ${CLI_SOURCES}
-    ${CONTROL_SOURCES}
-    ${SOURCES}
+target_include_directories(quids_control
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(quids_control
+    PRIVATE
+    blockchain
+    evm
+    rollup
+    fmt::fmt
+    spdlog::spdlog)
+
+# Main executable
+add_executable(quids_main
+    main.cpp
 )
 
-# Modify the existing quids_core library
-add_library(quids_core SHARED ${QUIDS_SOURCES})
+target_include_directories(quids_main
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Add core dependencies
-target_link_libraries(quids_core
+target_link_libraries(quids_main
+    PRIVATE
+    quids_cli
+    quids_control)
+
+# Main shared library
+add_library(quids SHARED)
+
+# Add sources
+target_sources(quids PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+)
+
+target_link_libraries(quids
+    PUBLIC
+    blockchain
+    crypto
+    quantum
+    neural
+    zkp
+    storage
+    rollup
+    evm
+    quids_cli
+    quids_control
+    fmt::fmt
+    spdlog::spdlog
     PRIVATE
     OpenMP::OpenMP_CXX
     OpenSSL::Crypto
@@ -45,23 +113,19 @@ target_link_libraries(quids_core
     ${ROCKSDB_LIBRARY}
     ${GMP_LIBRARY}
     Eigen3::Eigen
-    fmt::fmt
-    ${ZLIB_LIBRARIES}
-    spdlog::spdlog
+    ZLIB::ZLIB
 )
 
-# Modern CMake way to handle includes
-target_include_directories(quids_core
+target_include_directories(quids
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-        ${ROCKSDB_INCLUDE_DIR}
-        ${JSON_INCLUDE_DIR}
-        ${ZLIB_INCLUDE_DIRS}
-        ${EIGEN3_INCLUDE_DIR}
-        ${VENDOR_DIR}
-        ${GMP_INCLUDE_DIR}
-        ${libp2p_INCLUDE_DIRS}
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${OPENSSL_INCLUDE_DIR}
+    ${CURL_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIRS}
+    ${ROCKSDB_INCLUDE_DIR}
+    ${EIGEN3_INCLUDE_DIR}
+    ${GMP_INCLUDE_DIR}
 )
-
-include_directories(${CMAKE_SOURCE_DIR}/include)

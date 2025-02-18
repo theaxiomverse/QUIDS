@@ -1,8 +1,11 @@
+
+#include "StdNamespace.hpp"
+#include "crypto/signature/Dilithium.hpp"
 #include "quantum/QuantumCrypto.hpp"
 #include "quantum/QuantumState.hpp"
 #include "quantum/QuantumOperations.hpp"
 #include "quantum/QuantumDetail.hpp"
-#include "crypto/falcon_signature.hpp"
+
 #include <stdexcept>
 #include <cmath>
 #include <random>
@@ -50,12 +53,11 @@ public:
      * @return Unique pointer to the created signature scheme
      * @throws std::invalid_argument if scheme is unsupported
      */
-    std::unique_ptr<crypto::falcon::FalconSignature> createSignatureScheme(SignatureScheme scheme) {
+    std::unique_ptr<crypto::DilithiumSigner> createSignatureScheme(SignatureScheme scheme) {
         switch (scheme) {
-            case SignatureScheme::FALCON512:
-                return std::make_unique<crypto::falcon::FalconSignature>(512);
-            case SignatureScheme::FALCON1024:
-                return std::make_unique<crypto::falcon::FalconSignature>(1024);
+            case SignatureScheme::DILITHIUM:
+                return std::make_unique<crypto::DilithiumSigner>();
+
             default:
                 throw std::invalid_argument("Unsupported signature scheme");
         }
@@ -75,18 +77,18 @@ QuantumCrypto::~QuantumCrypto() = default;
  * @param key_length Length of key to generate in bits
  * @return Generated quantum key
  * @throws std::invalid_argument if key length is too small
- */
-QuantumKey QuantumCrypto::generateQuantumKey(size_t key_length) {
-    if (key_length < MIN_KEY_SIZE) {
+ */ 
+QuantumKey QuantumCrypto::generateKey(const QuantumEncryptionParams& params) {
+    if (params.key_size < MIN_KEY_SIZE) {
         throw std::invalid_argument("Key length must be at least 256 bits");
     }
 
     QuantumKey key;
     
-    key.key_material.resize(key_length / 8);
-    key.security_parameter = impl_->params_.security_parameter;
-    key.entangled_state = QuantumState(key_length);  // Create QuantumState directly
-    key.effective_length = key_length;
+    key.key_material.resize(params.key_size / 8);
+    key.security_parameter = params.security_parameter;
+    key.entangled_state = QuantumState(params.key_size);  // Create QuantumState directly
+    key.effective_length = params.key_size;
     
     // Generate random key material using std random
     std::random_device rd;
@@ -99,9 +101,9 @@ QuantumKey QuantumCrypto::generateQuantumKey(size_t key_length) {
 
     // Create entangled state
     std::normal_distribution<double> state_dist(0.0, 1.0);
-    Eigen::VectorXcd state_vector = Eigen::VectorXcd::Zero(key_length);
+    Eigen::VectorXcd state_vector = Eigen::VectorXcd::Zero(params.key_size);
     
-    for (size_t i = 0; i < key_length; ++i) {
+    for (size_t i = 0; i < params.key_size; ++i) {
         state_vector(static_cast<Eigen::Index>(i)) = std::complex<double>(state_dist(gen), state_dist(gen));
     }
     state_vector.normalize();
@@ -126,7 +128,7 @@ bool QuantumCrypto::distributeKey(const std::string& recipient_id, const Quantum
     return true;
 }
 
-std::vector<uint8_t> QuantumCrypto::encryptQuantum(
+std::vector<uint8_t> QuantumCrypto::encrypt(
     const std::vector<uint8_t>& plaintext,
     const QuantumKey& key) {
     
@@ -145,7 +147,7 @@ std::vector<uint8_t> QuantumCrypto::encryptQuantum(
     return ciphertext;
 }
 
-std::vector<uint8_t> QuantumCrypto::decryptQuantum(
+std::vector<uint8_t> QuantumCrypto::decrypt(
     const std::vector<uint8_t>& ciphertext,
     const QuantumKey& key) {
     
@@ -164,45 +166,55 @@ std::vector<uint8_t> QuantumCrypto::decryptQuantum(
     return plaintext;
 }
 
-QuantumSignature QuantumCrypto::signQuantum(const std::vector<uint8_t>& message,
-                                          const QuantumKey& signing_key) {
+/**
+ * @brief Create a quantum-enhanced digital signature for given data
+ * @param data Data to be signed
+ * @param params Parameters controlling the signature generation
+ * @return Generated quantum signature structure
+ */ 
+QuantumSignature QuantumCrypto::sign(const std::vector<uint8_t>& data, 
+                         const quids::quantum::QuantumEncryptionParams& params) {
     // Cache key states
     static thread_local std::unordered_map<size_t, QuantumState> key_cache_;
     
     // Fast path for cached states
-    auto cache_key = std::hash<std::string>{}(std::string(message.begin(), message.end()));
+    auto cache_key = std::hash<std::string>{}(std::string(data.begin(), data.end()));
     if (auto it = key_cache_.find(cache_key); it != key_cache_.end()) {
-        QuantumSignature sig{};  // Initialize struct
-        sig.signature = sign(message, signing_key.key_material);
-        sig.verification_score = 0.95;
-        sig.proof = utils::generateSignatureProof(message, signing_key);
+        QuantumSignature sig{};  
+        sig.scheme = params.sig_scheme;
+        sig.fidelity = 1.0;
+        sig.sig_data = sign(data, params).sig_data;
         return sig;
     }
 
-    QuantumSignature sig{};  // Initialize struct
-    
     // Parallel signature generation
     #pragma omp parallel sections 
     {
+
+
         #pragma omp section
         {
-            sig.signature = sign(message, signing_key.key_material);
+            QuantumSignature sig{};  
+            sig.sig_data = sign(data, params).sig_data;
+            sig.scheme = params.sig_scheme;
         }
         
         #pragma omp section
         {
-            sig.proof = utils::generateSignatureProof(message, signing_key);
+            QuantumSignature sig{};  
+            sig.proof = utils::generateSignatureProof(sig.sig_data, params.key);
+                sig.scheme = params.sig_scheme;
         }
     }
 
-    return sig;
+   return QuantumSignature{};
 }
 
-bool QuantumCrypto::verifyQuantumSignature(const std::vector<uint8_t>& message,
+bool QuantumCrypto::verify(const std::vector<uint8_t>& message,
                                          const QuantumSignature& signature,
                                          const QuantumKey& verification_key) {
     // First verify classical signature
-    if (!verify(message, signature.signature, verification_key.key_material)) {
+    if (!verify(message, signature, verification_key)) {
         return false;
     }
     
@@ -213,7 +225,7 @@ bool QuantumCrypto::verifyQuantumSignature(const std::vector<uint8_t>& message,
     }
     
     // Verify message hasn't been modified
-    std::vector<uint8_t> recovered = decryptQuantum(signature.signature, verification_key);
+    std::vector<uint8_t> recovered = decrypt(signature.sig_data, verification_key);
     return recovered == message;
 }
 
@@ -343,7 +355,9 @@ bool detectQuantumTampering([[maybe_unused]] const QuantumMeasurement& measureme
 std::pair<std::vector<uint8_t>, std::vector<uint8_t>> 
 QuantumCrypto::generateKeypair(SignatureScheme scheme) {
     auto signer = impl_->createSignatureScheme(scheme);
-    auto [pk, sk] = signer->generate_key_pair();
+    signer->generateKeyPair();
+    auto pk = signer->getPublicKey();
+    auto sk = signer->getPrivateKey();
     
     return {
         std::vector<uint8_t>(pk.begin(), pk.end()),
@@ -351,50 +365,43 @@ QuantumCrypto::generateKeypair(SignatureScheme scheme) {
     };
 }
 
-std::vector<uint8_t> 
+/**
+ * @brief Sign a message using a private key
+ * @param message Message to sign
+ * @param private_key Private key to use for signing
+ * @return Signed message
+ */ 
+QuantumSignature 
 QuantumCrypto::sign(const std::vector<uint8_t>& message, 
                     const std::vector<uint8_t>& private_key) 
 {
     // Determine scheme from key length
     SignatureScheme scheme = (private_key.size() <= 1281) ? 
-        SignatureScheme::FALCON512 : SignatureScheme::FALCON1024;
+        SignatureScheme::DILITHIUM : SignatureScheme::FALCON;
     
     auto signer = impl_->createSignatureScheme(scheme);
-    
+     signer->generateKeyPair();
     // Import the private key
     std::string sk(private_key.begin(), private_key.end());
-    std::string dummy_pk(signer->pklen, 0); // We only need the secret key for signing
-    signer->import_key_pair(dummy_pk, sk);
+    std::string dummy_pk(signer->getPublicKeySize(), 0); // We only need the secret key for signing
+   
+   
     
     // Sign the message
     std::string msg(message.begin(), message.end());
-    std::string signature = signer->sign_message(msg);
+    std::string signature = signer->signMessage(msg);
+    QuantumKey key = utils::deriveQuantumKey(impl_->current_state_);
     
-    return std::vector<uint8_t>(signature.begin(), signature.end());
+    return QuantumSignature{
+        .sig_data = std::vector<uint8_t>(signature.begin(), signature.end()),
+        .scheme = scheme,
+        .fidelity = 1.0,
+        .proof = utils::generateSignatureProof(message, key)
+        
+    };
 }
 
-bool 
-QuantumCrypto::verify(const std::vector<uint8_t>& message,
-                      const std::vector<uint8_t>& signature,
-                      const std::vector<uint8_t>& public_key) 
-{
-    // Determine scheme from key length
-    SignatureScheme scheme = (public_key.size() <= 897) ? 
-        SignatureScheme::FALCON512 : SignatureScheme::FALCON1024;
     
-    auto signer = impl_->createSignatureScheme(scheme);
-    
-    // Import the public key
-    std::string pk(public_key.begin(), public_key.end());
-    std::string dummy_sk(signer->sklen, 0); // We only need the public key for verification
-    signer->import_key_pair(pk, dummy_sk);
-    
-    // Verify the signature
-    std::string msg(message.begin(), message.end());
-    std::string sig(signature.begin(), signature.end());
-    
-    return signer->verify_signature(msg, sig);
-}
 
 } // namespace quantum
 } // namespace quids 

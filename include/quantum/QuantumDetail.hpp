@@ -6,7 +6,7 @@ namespace quids {
 namespace quantum {
 namespace detail {
 
-double calculateFidelity(const QuantumState& state1, const QuantumState& state2);
+double calculateFidelity(const QuantumState& state1, const QuantumState& state2) noexcept;
 double calculateQuantumEntanglement(const QuantumState& state);
 ErrorSyndrome detectQuantumErrors(const QuantumState& state);
 QuantumState correctQuantumErrors(const QuantumState& state, const ErrorSyndrome& syndrome);
