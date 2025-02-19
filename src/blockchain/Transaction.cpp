@@ -159,6 +159,19 @@ bool Transaction::verify() const {
     return ByteVector(hash.begin(), hash.end()) == ByteVector(signature.begin(), signature.end());
 }
 
+
+    std::string Transaction::bytesToHex(const std::vector<uint8_t>& bytes)  {
+        static const char hex_chars[] = "0123456789abcdef";
+        std::string result;
+        result.reserve(bytes.size() * 2);
+
+        for (const auto& byte : bytes) {
+            result.push_back(hex_chars[byte >> 4]);
+            result.push_back(hex_chars[byte & 0x0F]);
+        }
+        return result;
+    }
+
 std::string Transaction::toString() const {
     std::stringstream ss;
     ss << "Transaction{"
