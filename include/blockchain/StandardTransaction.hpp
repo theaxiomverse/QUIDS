@@ -12,6 +12,7 @@ class StandardTransaction : public Transaction {
 public:
     StandardTransaction() = default;
     ~StandardTransaction() override = default;
+    StandardTransaction(const Address& sender, const Address& receiver, Value value, const Data& data, const Signature& signature);
 
     // Core virtual methods
     void serialize(ByteVector& out) const override;

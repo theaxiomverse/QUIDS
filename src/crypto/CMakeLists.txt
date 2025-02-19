@@ -1,6 +1,6 @@
 # Crypto component
 add_library(crypto STATIC
-    falcon_signature.cpp
+
     QuantumHashFunction.cpp
     QuantumInterface.cpp
 )
@@ -22,4 +22,5 @@ target_include_directories(crypto
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${OPENSSL_INCLUDE_DIR}
     ${BLAKE3_INCLUDE_DIR}
+
 )

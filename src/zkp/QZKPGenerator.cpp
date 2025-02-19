@@ -71,9 +71,9 @@ QZKPGenerator::Proof QZKPGenerator::generate_proof(const quantum::QuantumState& 
     // Perform measurements
     std::vector<bool> measurement_outcomes;
     for (size_t i = 0; i < measurements.size(); i++) {
-        transformed_state.apply_measurement(measurements[i]);
+        transformed_state.applyMeasurement(measurements[i]);
     }
-    measurement_outcomes = transformed_state.get_measurement_outcomes();
+    measurement_outcomes = transformed_state.getMeasurementOutcomes();
     
     // Create proof data
     Proof proof;
@@ -98,8 +98,8 @@ bool QZKPGenerator::verify_proof(const Proof& proof, const quantum::QuantumState
     
     // Perform measurements and compare results
     for (size_t i = 0; i < proof.measurement_qubits.size(); i++) {
-        verification_state.apply_measurement(proof.measurement_qubits[i]);
-        auto outcomes = verification_state.get_measurement_outcomes();
+        verification_state.applyMeasurement(proof.measurement_qubits[i]);
+        auto outcomes = verification_state.getMeasurementOutcomes();
         if (!outcomes.empty() && outcomes.back() != proof.measurement_outcomes[i]) {
             return false;
         }
@@ -139,7 +139,7 @@ void QZKPGenerator::apply_random_transformations(
     const std::vector<double>& phases
 ) const {
     for (size_t i = 0; i < phases.size(); i++) {
-        state.apply_phase(i, phases[i]);
+        state.applyPhase(i, phases[i]);
     }
 }
 
@@ -218,7 +218,7 @@ std::vector<uint8_t> QZKPGenerator::generate_partial_proof(
     size_t end_idx
 ) {
     // Get subset of state vector
-    const auto& full_state = state.get_state_vector();
+    const auto& full_state = state.getStateVector();
     Eigen::VectorXcd partial_state = full_state.segment(start_idx, end_idx - start_idx);
     
     // Create quantum state from partial vector

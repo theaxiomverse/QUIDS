@@ -35,7 +35,7 @@ set(GMP_ROOT "/usr/local/Cellar/gmp/6.3.0")
 set(GMP_INCLUDE_DIR "${GMP_ROOT}/include")
 set(GMP_LIBRARY_DIR "${GMP_ROOT}/lib")
 
-include_directories(${ROCKSDB_INCLUDE_DIR})
+include_directories(${ROCKSDB_INCLUDE_DIR} /usr/local/Cellar/eigen/3.4.0_1/include/eigen3)
 find_library(ROCKSDB_LIBRARY
     NAMES rocksdb
     PATHS ${ROCKSDB_LIBRARY_DIR}

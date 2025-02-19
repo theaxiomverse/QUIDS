@@ -5,7 +5,7 @@
 #include <optional>
 #include <type_traits>
 
-#include <crypto/falcon/falcon.hpp>
+#include <falcon/falcon.hpp>
 
 
 

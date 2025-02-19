@@ -16,11 +16,14 @@ public:
     ~PersistentStorage();
 
     // Transaction storage
-    bool storeTransaction(const blockchain::Transaction& tx);
-    std::optional<blockchain::Transaction> loadTransaction(const std::array<uint8_t, 32>& tx_hash);
-    std::vector<blockchain::Transaction> loadTransactions(uint64_t block_number);
+    [[maybe_unused]] [[maybe_unused]] bool storeTransaction(const blockchain::Transaction& tx);
 
-    // Proof storage
+    [[maybe_unused]] std::optional<blockchain::Transaction> loadTransaction(const std::array<uint8_t, 32>& tx_hash);
+    std::vector<blockchain::Transaction> loadTransactions(uint64_t block_number);
+    [[maybe_unused]] std::optional<std::unique_ptr<blockchain::Transaction>> loadTransaction(const std::array<uint8_t, 32>& tx_hash) const noexcept;
+
+
+        // Proof storage
     bool storeProof(uint64_t block_number, const rollup::StateTransitionProof& proof);
     std::optional<rollup::StateTransitionProof> loadProof(uint64_t block_number);
 

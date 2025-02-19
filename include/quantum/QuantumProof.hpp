@@ -18,11 +18,12 @@ struct QuantumProof {
     ::quids::quantum::ErrorSyndrome error_data{};
     
     // Timing information
-    std::chrono::system_clock::time_point timestamp{std::chrono::system_clock::now()};
+    ::std::chrono::system_clock::time_point timestamp{::std::chrono::system_clock::now()};
     
     // Verification status
     bool is_verified{false};
     
+    // Proof metadata
     // Proof metadata
     struct Metadata {
         size_t num_qubits{1};

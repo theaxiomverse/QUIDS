@@ -23,7 +23,7 @@ std::string get_openssl_error() {
     char err_buf[256];
     unsigned long err = ERR_get_error();
     ERR_error_string_n(err, err_buf, sizeof(err_buf));
-    return std::string(err_buf); // #include <string>
+    return {err_buf}; // #include <string>
 }
 
     // RAII wrapper for OpenSSL initialization
@@ -47,7 +47,7 @@ std::string get_openssl_error() {
     };
 
     // Static initialization
-    static const OpenSSLGuard openssl_guard;
+    const OpenSSLGuard openssl_guard;
 }
 
 namespace quids::blockchain {
@@ -159,7 +159,7 @@ bool Transaction::verify() const {
     return ByteVector(hash.begin(), hash.end()) == ByteVector(signature.begin(), signature.end());
 }
 
-::std::string Transaction::toString() const {
+std::string Transaction::toString() const {
     std::stringstream ss;
     ss << "Transaction{"
        << "sender=" << sender
@@ -171,5 +171,7 @@ bool Transaction::verify() const {
        << "}";
     return ss.str();
 }
+
+
 
 } // namespace quids::blockchain 
