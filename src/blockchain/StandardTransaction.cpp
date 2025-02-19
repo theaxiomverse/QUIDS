@@ -1,4 +1,5 @@
-#include "blockchain/Transaction.hpp"
+#include "blockchain/StandardTransaction.hpp"
+#include "blockchain/Address.hpp"
 #include "crypto/blake3/Blake3Hash.hpp"
 #include <sstream>
 #include <iomanip>
@@ -6,123 +7,241 @@
 
 namespace quids::blockchain {
 
-void StandardTransaction::serialize(ByteVector& out) const {
-    // Reserve space for all fields
-    out.reserve(sizeof(Timestamp) + 2 * sizeof(Address) + sizeof(Value) + 
-                data.size() + sizeof(Signature) + 2 * sizeof(uint64_t));
+    void StandardTransaction::serialize(ByteVector& out) const {
+        // Get serialized addresses
+        auto serialized_sender = sender.serialize();
+        auto serialized_receiver = receiver.serialize();
 
-    // Serialize all fields
-    const char* timestamp_ptr = reinterpret_cast<const char*>(&timestamp);
-    out.insert(out.end(), timestamp_ptr, timestamp_ptr + sizeof(Timestamp));
+        // Calculate total size needed
+        const size_t total_size = sizeof(Timestamp) +
+                                  serialized_sender.size() +
+                                  serialized_receiver.size() +
+                                  sizeof(Value) +
+                                  data.size() +
+                                  sizeof(Signature) +
+                                  2 * sizeof(uint64_t);
 
-    out.insert(out.end(), sender.begin(), sender.end());
-    out.insert(out.end(), receiver.begin(), receiver.end());
+        // Resize once instead of multiple inserts
+        out.resize(total_size);
+        size_t offset = 0;
 
-    const char* value_ptr = reinterpret_cast<const char*>(&value);
-    out.insert(out.end(), value_ptr, value_ptr + sizeof(Value));
+        // Copy timestamp
+        memcpy(out.data() + offset, &timestamp, sizeof(Timestamp));
+        offset += sizeof(Timestamp);
 
-    out.insert(out.end(), data.begin(), data.end());
-    out.insert(out.end(), signature.begin(), signature.end());
+        // Copy sender address
+        memcpy(out.data() + offset, serialized_sender.data(), serialized_sender.size());
+        offset += serialized_sender.size();
 
-    const char* nonce_ptr = reinterpret_cast<const char*>(&nonce);
-    out.insert(out.end(), nonce_ptr, nonce_ptr + sizeof(uint64_t));
+        // Copy receiver address
+        memcpy(out.data() + offset, serialized_receiver.data(), serialized_receiver.size());
+        offset += serialized_receiver.size();
 
-    const char* gas_cost_ptr = reinterpret_cast<const char*>(&gas_cost);
-    out.insert(out.end(), gas_cost_ptr, gas_cost_ptr + sizeof(uint64_t));
-}
+        // Copy value
+        memcpy(out.data() + offset, &value, sizeof(Value));
+        offset += sizeof(Value);
 
-bool StandardTransaction::deserialize(const ByteVector& data) {
-    if (data.size() < sizeof(Timestamp) + 2 * sizeof(Address) + sizeof(Value) + 
-                      sizeof(Signature) + 2 * sizeof(uint64_t)) {
-        return false;
+        // Copy transaction data
+        memcpy(out.data() + offset, data.data(), data.size());
+        offset += data.size();
+
+        // Copy signature
+        memcpy(out.data() + offset, signature.data(), signature.size());
+        offset += signature.size();
+
+        // Copy nonce and gas cost
+        memcpy(out.data() + offset, &nonce, sizeof(uint64_t));
+        offset += sizeof(uint64_t);
+        memcpy(out.data() + offset, &gas_cost, sizeof(uint64_t));
     }
 
-    size_t offset = 0;
+    bool StandardTransaction::deserialize(const ByteVector& data) {
+        const size_t address_size = TOTAL_SIZE; // Assuming this is defined in Address class
+        const size_t min_size = sizeof(Timestamp) + 2 * address_size + sizeof(Value) +
+                                sizeof(Signature) + 2 * sizeof(uint64_t);
 
-    // Deserialize timestamp
-    std::memcpy(&timestamp, data.data() + offset, sizeof(Timestamp));
-    offset += sizeof(Timestamp);
+        if (data.size() < min_size) {
+            return false;
+        }
 
-    // Deserialize addresses
-    std::copy(data.begin() + offset, data.begin() + offset + sizeof(Address), sender.begin());
-    offset += sizeof(Address);
-    std::copy(data.begin() + offset, data.begin() + offset + sizeof(Address), receiver.begin());
-    offset += sizeof(Address);
+        const uint8_t* ptr = data.data();
+        size_t offset = 0;
 
-    // Deserialize value
-    std::memcpy(&value, data.data() + offset, sizeof(Value));
-    offset += sizeof(Value);
+        // Deserialize timestamp
+        memcpy(&timestamp, ptr + offset, sizeof(Timestamp));
+        offset += sizeof(Timestamp);
 
-    // Deserialize data
-    size_t data_size = data.size() - offset - sizeof(Signature) - 2 * sizeof(uint64_t);
-    this->data.resize(data_size);
-    std::copy(data.begin() + offset, data.begin() + offset + data_size, this->data.begin());
-    offset += data_size;
+        // Deserialize sender address
+        std::vector<uint8_t> sender_data(ptr + offset, ptr + offset + address_size);
+        auto maybe_sender = Address::deserialize(sender_data);
+        if (!maybe_sender) return false;
+        sender = *maybe_sender;
+        offset += address_size;
 
-    // Deserialize signature
-    std::copy(data.begin() + offset, data.begin() + offset + sizeof(Signature), signature.begin());
-    offset += sizeof(Signature);
+        // Deserialize receiver address
+        std::vector<uint8_t> receiver_data(ptr + offset, ptr + offset + address_size);
+        auto maybe_receiver = Address::deserialize(receiver_data);
+        if (!maybe_receiver) return false;
+        receiver = *maybe_receiver;
+        offset += address_size;
 
-    // Deserialize nonce and gas cost
-    std::memcpy(&nonce, data.data() + offset, sizeof(uint64_t));
-    offset += sizeof(uint64_t);
-    std::memcpy(&gas_cost, data.data() + offset, sizeof(uint64_t));
+        // Deserialize value
+        memcpy(&value, ptr + offset, sizeof(Value));
+        offset += sizeof(Value);
 
-    return true;
-}
+        // Deserialize transaction data
+        const size_t data_size = data.size() - offset - sizeof(Signature) - 2 * sizeof(uint64_t);
+        this->data.resize(data_size);
+        memcpy(this->data.data(), ptr + offset, data_size);
+        offset += data_size;
 
-std::vector<uint8_t> StandardTransaction::computeHash() const {
-    ByteVector serialized;
-    serialize(serialized);
-    
-    Blake3Hash hasher;
-    hasher.update(serialized.data(), serialized.size());
-    return hasher.finalize();
-}
+        // Deserialize signature
+        memcpy(signature.data(), ptr + offset, sizeof(Signature));
+        offset += sizeof(Signature);
 
-bool StandardTransaction::verify() const {
-    if (sender.empty() || receiver.empty()) {
-        return false;
+        // Deserialize nonce and gas cost
+        memcpy(&nonce, ptr + offset, sizeof(uint64_t));
+        offset += sizeof(uint64_t);
+        memcpy(&gas_cost, ptr + offset, sizeof(uint64_t));
+
+        return true;
     }
 
-    // Verify signature
-    ByteVector message;
-    message.reserve(sizeof(Timestamp) + 2 * sizeof(Address) + sizeof(Value) + 
-                   data.size() + 2 * sizeof(uint64_t));
+    std::vector<uint8_t> StandardTransaction::computeHash() const {
+        // Pre-calculate the size needed for serialization
+        const size_t serialized_size = sizeof(Timestamp) + 2 * sizeof(Address) +
+                                       sizeof(Value) + data.size() +
+                                       sizeof(Signature) + 2 * sizeof(uint64_t);
+        ByteVector serialized;
+        serialized.reserve(serialized_size);  // Reserve exact space needed
+        serialize(serialized);
 
-    const char* timestamp_ptr = reinterpret_cast<const char*>(&timestamp);
-    message.insert(message.end(), timestamp_ptr, timestamp_ptr + sizeof(Timestamp));
-    message.insert(message.end(), sender.begin(), sender.end());
-    message.insert(message.end(), receiver.begin(), receiver.end());
+        Blake3Hash hasher;
+        hasher.update(serialized.data(), serialized.size());
+        return hasher.finalize();
+    }
 
-    const char* value_ptr = reinterpret_cast<const char*>(&value);
-    message.insert(message.end(), value_ptr, value_ptr + sizeof(Value));
-    message.insert(message.end(), data.begin(), data.end());
+    std::string StandardTransaction::toString() const {
 
-    const char* nonce_ptr = reinterpret_cast<const char*>(&nonce);
-    message.insert(message.end(), nonce_ptr, nonce_ptr + sizeof(uint64_t));
 
-    const char* gas_cost_ptr = reinterpret_cast<const char*>(&gas_cost);
-    message.insert(message.end(), gas_cost_ptr, gas_cost_ptr + sizeof(uint64_t));
 
-    Blake3Hash hasher;
-    hasher.update(message.data(), message.size());
-    auto hash = hasher.finalize();
+        static constexpr std::string_view LABELS[] = {
+                "Timestamp: ",
+                "\nSender: ",
+                "\nReceiver: ",
+                "\nValue: ",
+                "\nData: ",
+                "\nSignature: ",
+                "\nNonce: ",
+                "\nGas Cost: ",
+                "\n"
+        };
 
-    return ByteVector(hash.begin(), hash.end()) == ByteVector(signature.begin(), signature.end());
-}
+        std::string result;
+        result.reserve(256);
 
-std::string StandardTransaction::toString() const {
-    std::stringstream ss;
-    ss << "Transaction{"
-       << "sender=" << sender
-       << ", receiver=" << receiver
-       << ", value=" << value
-       << ", nonce=" << nonce
-       << ", gas_cost=" << gas_cost
-       << ", data_size=" << data.size()
-       << "}";
-    return ss.str();
-}
+        auto time_t_timestamp = std::chrono::system_clock::to_time_t(timestamp);
+        std::tm tm = *std::gmtime(&time_t_timestamp);  // Use gmtime for UTC
+        char time_str[32];
+        std::strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S UTC", &tm);
 
-} // namespace quids::blockchain 
+        result.append(LABELS[0])
+                .append(time_str)
+                .append(LABELS[1])
+                .append(sender.getAddress())
+                .append(LABELS[2])
+                .append(receiver.getAddress())
+                .append(LABELS[3])
+                .append(std::to_string(value))
+                .append(LABELS[4]);
+
+
+        if (data.empty()) {
+            result.append("empty");
+        } else {
+            result.append(StandardTransaction::bytesToHex(data));
+        }
+
+        result.append(LABELS[5]);
+
+        // Hex conversion for signature
+        static const char hex_chars[] = "0123456789abcdef";
+        for (const auto& byte : signature) {
+            result.push_back(hex_chars[byte >> 4]);
+            result.push_back(hex_chars[byte & 0x0F]);
+        }
+
+        result.append(LABELS[6])
+                .append(std::to_string(nonce))
+                .append(LABELS[7])
+                .append(std::to_string(gas_cost))
+                .append(LABELS[8]);
+
+        return result;
+    }
+
+
+    std::string StandardTransaction::bytesToHex(const std::vector<uint8_t>& bytes) const {
+        static const char hex_chars[] = "0123456789abcdef";
+        std::string result;
+        result.reserve(bytes.size() * 2);
+
+        for (const auto& byte : bytes) {
+            result.push_back(hex_chars[byte >> 4]);
+            result.push_back(hex_chars[byte & 0x0F]);
+        }
+        return result;
+    }
+
+
+    bool StandardTransaction::verify() const {
+        if (sender.getAddress().empty() || receiver.getAddress().empty()) {
+            return false;
+        }
+
+        // Create serialized addresses
+        auto serialized_sender = sender.serialize();
+        auto serialized_receiver = receiver.serialize();
+
+        // Calculate message size
+        const size_t msg_size = sizeof(Timestamp) +
+                                serialized_sender.size() +
+                                serialized_receiver.size() +
+                                sizeof(Value) +
+                                data.size() +
+                                2 * sizeof(uint64_t);
+
+        ByteVector message(msg_size);
+        size_t offset = 0;
+
+        // Build message
+        memcpy(message.data() + offset, &timestamp, sizeof(Timestamp));
+        offset += sizeof(Timestamp);
+
+        memcpy(message.data() + offset, serialized_sender.data(), serialized_sender.size());
+        offset += serialized_sender.size();
+
+        memcpy(message.data() + offset, serialized_receiver.data(), serialized_receiver.size());
+        offset += serialized_receiver.size();
+
+        memcpy(message.data() + offset, &value, sizeof(Value));
+        offset += sizeof(Value);
+
+        memcpy(message.data() + offset, data.data(), data.size());
+        offset += data.size();
+
+        memcpy(message.data() + offset, &nonce, sizeof(uint64_t));
+        offset += sizeof(uint64_t);
+
+        memcpy(message.data() + offset, &gas_cost, sizeof(uint64_t));
+
+        // Verify signature
+        Blake3Hash hasher;
+        hasher.update(message.data(), message.size());
+        auto hash = hasher.finalize();
+
+        return std::equal(hash.begin(), hash.end(), signature.begin());
+    }
+
+
+} // namespace quids::blockchain

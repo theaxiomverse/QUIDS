@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <memory>
 #include <chrono>
+#include "Address.hpp"
 
 namespace quids::blockchain {
 
@@ -41,6 +42,8 @@ public:
     [[nodiscard]] virtual GasPrice getGasPrice() const = 0;
     [[nodiscard]] virtual GasLimit getGasLimit() const = 0;
     [[nodiscard]] virtual uint64_t getNonce() const noexcept = 0;
+
+    [[nodiscard]] virtual std::string bytesToHex(const std::vector<uint8_t>& bytes);
 
 protected:
     Timestamp timestamp{std::chrono::system_clock::now()};

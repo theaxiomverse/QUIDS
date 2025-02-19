@@ -45,6 +45,7 @@ public:
     [[nodiscard]] const ByteVector& getData() const noexcept { return data; }
     [[nodiscard]] const Signature& getSignature() const noexcept { return signature; }
     [[nodiscard]] Timestamp getTimestamp() const noexcept { return timestamp; }
+    [[nodiscard]] std::string bytesToHex(const std::vector<uint8_t>& bytes) const;
 
 private:
     Address sender;

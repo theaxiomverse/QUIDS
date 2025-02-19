@@ -26,7 +26,7 @@ namespace quids::blockchain {
     using GasLimit = uint64_t;
     using Nonce = uint64_t;
     using Value = uint64_t;
-    using Address = ::std::string;
+    // using Address = ::std::string;
     using Data = ByteVector;
     using Signature = ByteArray;
     using PublicKey = ByteArray;

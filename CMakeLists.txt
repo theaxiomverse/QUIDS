@@ -50,7 +50,10 @@ if(NOT TARGET Eigen3::Eigen)
 endif()
 
 # Create interface library for common includes
-add_library(project_includes INTERFACE)
+add_library(project_includes INTERFACE
+        src/blockchain/Address.cpp
+        include/blockchain/Address.hpp
+        src/blockchain/AddressManager.cpp)
 target_include_directories(project_includes 
     INTERFACE
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

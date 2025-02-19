@@ -82,7 +82,9 @@ target_link_libraries(quids_main
     quids_control)
 
 # Main shared library
-add_library(quids SHARED)
+add_library(quids SHARED
+        common/Bytes.cpp
+        ../include/common/Bytes.hpp)
 
 # Add sources
 target_sources(quids PRIVATE
