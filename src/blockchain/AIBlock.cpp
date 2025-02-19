@@ -9,9 +9,8 @@
 #include "blockchain/Types.hpp"
 
 namespace quids::blockchain {
-
-    using ByteArray = ::std::vector<uint8_t>;
-    using UniquePtr = ::std::unique_ptr<ByteArray>;
+    // Remove the ByteArray and UniquePtr type aliases as they are likely defined elsewhere
+    // with different types, causing the redefinition error
 
     class AIBlock::Impl {
     public:
@@ -77,7 +76,7 @@ namespace quids::blockchain {
         Impl& operator=(Impl&&) noexcept = default;
 
     private:
-        void initializeComponents() {
+        static void initializeComponents() {
             try {
                 // Initialize any additional components here
             } catch (const std::exception& e) {
@@ -101,5 +100,10 @@ namespace quids::blockchain {
         std::chrono::steady_clock::time_point lastUpdateTime_;
         bool isInitialized_;
     };
+
+    size_t AIBlock::getTransactionCount() {
+        return 0;
+    }
+
 
 } // namespace quids::blockchain

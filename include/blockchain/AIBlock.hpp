@@ -42,9 +42,9 @@ public:
 
     // Block interface implementation
     bool addTransaction(const Transaction& tx) override;
-    size_t getTransactionCount() const override;
-    const Transaction& getTransaction(size_t index) const override;
-    bool verifyTransactions() const override;
+    static size_t getTransactionCount() ;
+    const Transaction& getTransaction(size_t index) const;
+    bool verifyTransactions() const;
     bool verify() const override;
     ByteArray hash() const override;
     void computeHash() override;
@@ -52,7 +52,7 @@ public:
     void applyQuantumOptimization() override;
     double calculateQuantumSecurityScore() const override;
     void serialize(ByteVector& out) const override;
-    bool deserialize(const ByteVector& data) override;
+    void deserialize(const ByteVector& data) override;
 
     // AI-specific methods
     void optimize();

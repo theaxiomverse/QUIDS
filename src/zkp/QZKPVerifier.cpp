@@ -38,7 +38,7 @@ QZKPVerifier::VerificationDetails QZKPVerifier::verify_proof(
     
     // Verify measurement consistency
     size_t matching_count = 0;
-    auto state_measurements = claimed_state.get_measurement_outcomes();
+    auto state_measurements = claimed_state.getMeasurementOutcomes();
     details.measurements_match = verify_measurement_consistency(
         proof.measurement_outcomes, 
         state_measurements,
@@ -108,14 +108,14 @@ double QZKPVerifier::calculate_confidence_score(
     size_t& matching_measurements
 ) const {
     // Get state vector
-    auto state_vector = state.get_state_vector();
+    auto state_vector = state.getStateVector();
     total_measurements = proof.measurement_outcomes.size();
     matching_measurements = 0;
     
     // Calculate fidelity between proof and claimed state
     fidelity = 0.0;
     for (size_t i = 0; i < proof.measurement_outcomes.size(); i++) {
-        if (proof.measurement_outcomes[i] == state.get_measurement_outcomes()[i]) {
+        if (proof.measurement_outcomes[i] == state.getMeasurementOutcomes()[i]) {
             matching_measurements++;
             fidelity += 1.0;
         }
@@ -164,7 +164,7 @@ double QZKPVerifier::calculate_entanglement_fidelity(
     const EntanglementProof& proof
 ) const {
     // Get entanglement matrix
-    auto entanglement_matrix = state.generate_entanglement();
+    auto entanglement_matrix = state.generateEntanglement();
     
     // Calculate trace fidelity between state and proof
     double trace_fidelity = 0.0;

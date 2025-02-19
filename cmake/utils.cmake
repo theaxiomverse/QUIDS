@@ -3,7 +3,7 @@
 # Set path hint variables based on vendor root
 function(set_vendor_paths name)
     set(${name}_ROOT "${VENDOR_ROOT}" PARENT_SCOPE)
-    set(${name}_INCLUDE_DIR "${VENDOR_ROOT}/include" PARENT_SCOPE)
+    set(${name}_INCLUDE_DIR "${VENDOR_ROOT}/includes" PARENT_SCOPE)
     set(${name}_LIBRARY_DIR "${VENDOR_ROOT}/lib" PARENT_SCOPE) 
 endfunction()
 

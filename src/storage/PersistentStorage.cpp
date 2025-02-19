@@ -1,17 +1,21 @@
 #include "storage/PersistentStorage.hpp"
+#include "blockchain/StandardTransaction.hpp"
 #include <rocksdb/db.h>
 #include <rocksdb/write_batch.h>
 #include <sstream>
 #include <filesystem>
+#include <utility>
 
 namespace quids {
 namespace storage {
+
+    class Transaction;
 
 struct PersistentStorage::Impl {
     std::unique_ptr<rocksdb::DB> db;
     std::string data_dir;
 
-    explicit Impl(const std::string& dir) : data_dir(dir) {
+    explicit Impl(std::string  dir) : data_dir(std::move(dir)) {
         rocksdb::Options options;
         options.create_if_missing = true;
         options.compression = rocksdb::kLZ4Compression;
@@ -37,39 +41,43 @@ PersistentStorage::PersistentStorage(const std::string& data_dir)
 
 PersistentStorage::~PersistentStorage() = default;
 
-bool PersistentStorage::storeTransaction(const blockchain::Transaction& tx) {
-    auto serialized = tx.serialize();
-    auto hash = tx.compute_hash();
+    [[maybe_unused]] bool PersistentStorage::storeTransaction(const blockchain::Transaction& tx) {
+    // Serialize the transaction and compute its hash
+    // Use the hash as the key in the database
+    // Store the serialized transaction data in the database
+    std::vector<uint8_t> out;
+    tx.serialize(out);
+    auto hash = tx.computeHash();
     std::string key = impl_->makeKey("tx", std::string(hash.begin(), hash.end()));
     
     rocksdb::Status status = impl_->db->Put(
         rocksdb::WriteOptions(),
         key,
-        rocksdb::Slice(reinterpret_cast<const char*>(serialized.data()), serialized.size())
+        rocksdb::Slice(reinterpret_cast<const char*>(out.data()), out.size())
     );
     
     return status.ok();
 }
 
-std::optional<blockchain::Transaction> PersistentStorage::loadTransaction(
-    const std::array<uint8_t, 32>& tx_hash
-) {
-    std::string key = impl_->makeKey("tx", std::string(tx_hash.begin(), tx_hash.end()));
-    std::string tx_data;
-    
-    rocksdb::Status status = impl_->db->Get(
-        rocksdb::ReadOptions(),
-        key,
-        &tx_data
-    );
-    
-    if (status.ok()) {
-        std::vector<uint8_t> data(tx_data.begin(), tx_data.end());
-        return blockchain::Transaction::deserialize(data);
+    [[maybe_unused]] std::optional<std::unique_ptr<blockchain::Transaction>> PersistentStorage::loadTransaction(const std::array<uint8_t, 32>& tx_hash) const noexcept {
+        std::string key = impl_->makeKey("tx", std::string(tx_hash.begin(), tx_hash.end()));
+        std::string tx_data;
+
+        rocksdb::Status status = impl_->db->Get(
+            rocksdb::ReadOptions(),
+            key,
+            &tx_data
+        );
+
+        if (status.ok()) {
+            std::vector<uint8_t> data(tx_data.begin(), tx_data.end());
+            auto tx = std::make_unique<blockchain::StandardTransaction>();
+            tx->deserialize(data);
+            return tx;
+        }
+
+        return std::nullopt;
     }
-    
-    return std::nullopt;
-}
 
 bool PersistentStorage::storeProof(uint64_t block_number, const rollup::StateTransitionProof& proof) {
     auto serialized = proof.serialize();
@@ -130,6 +138,10 @@ std::optional<std::vector<uint8_t>> PersistentStorage::loadBlockData(uint64_t bl
     
     return std::nullopt;
 }
+
+    std::vector<blockchain::Transaction> PersistentStorage::loadTransactions(uint64_t block_number) {
+        return std::vector<blockchain::Transaction>();
+    }
 
 } // namespace storage
 } // namespace quids 

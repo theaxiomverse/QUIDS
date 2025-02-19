@@ -53,10 +53,10 @@ RM = /usr/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Volumes/BIGCODE/quids-evm-cpp
+CMAKE_SOURCE_DIR = /Volumes/DockerStuff/GITHUB/quids/QUIDS
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Volumes/BIGCODE/quids-evm-cpp
+CMAKE_BINARY_DIR = /Volumes/DockerStuff/GITHUB/quids/QUIDS
 
 # Include any dependencies generated for this target.
 include tests/CMakeFiles/rollup_benchmarks.dir/depend.make
@@ -75,16 +75,16 @@ tests/CMakeFiles/rollup_benchmarks.dir/codegen:
 tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o: tests/CMakeFiles/rollup_benchmarks.dir/flags.make
 tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o: tests/rollup/RollupBenchmarkTests.cpp
 tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o: tests/CMakeFiles/rollup_benchmarks.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Volumes/BIGCODE/quids-evm-cpp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o"
-	cd /Volumes/BIGCODE/quids-evm-cpp/tests && /Library/Developer/CommandLineTools/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o -MF CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o.d -o CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o -c /Volumes/BIGCODE/quids-evm-cpp/tests/rollup/RollupBenchmarkTests.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Volumes/DockerStuff/GITHUB/quids/QUIDS/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o"
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests && /Library/Developer/CommandLineTools/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o -MF CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o.d -o CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o -c /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests/rollup/RollupBenchmarkTests.cpp
 
 tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.i"
-	cd /Volumes/BIGCODE/quids-evm-cpp/tests && /Library/Developer/CommandLineTools/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Volumes/BIGCODE/quids-evm-cpp/tests/rollup/RollupBenchmarkTests.cpp > CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.i
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests && /Library/Developer/CommandLineTools/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests/rollup/RollupBenchmarkTests.cpp > CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.i
 
 tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.s"
-	cd /Volumes/BIGCODE/quids-evm-cpp/tests && /Library/Developer/CommandLineTools/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Volumes/BIGCODE/quids-evm-cpp/tests/rollup/RollupBenchmarkTests.cpp -o CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.s
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests && /Library/Developer/CommandLineTools/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests/rollup/RollupBenchmarkTests.cpp -o CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.s
 
 # Object files for target rollup_benchmarks
 rollup_benchmarks_OBJECTS = \
@@ -93,34 +93,44 @@ rollup_benchmarks_OBJECTS = \
 # External object files for target rollup_benchmarks
 rollup_benchmarks_EXTERNAL_OBJECTS =
 
-tests/rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o
-tests/rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/build.make
-tests/rollup_benchmarks: libquids_core.dylib
-tests/rollup_benchmarks: libquids_blockchain.dylib
-tests/rollup_benchmarks: libquids_evm.a
-tests/rollup_benchmarks: libquids_quantum.dylib
-tests/rollup_benchmarks: /usr/local/lib/libfmt.a
-tests/rollup_benchmarks: /usr/local/Cellar/openssl@3/3.4.1/lib/libssl.dylib
-tests/rollup_benchmarks: /usr/local/Cellar/openssl@3/3.4.1/lib/libcrypto.dylib
-tests/rollup_benchmarks: /usr/local/lib/libblake3.dylib
-tests/rollup_benchmarks: /usr/local/lib/libboost_system.dylib
-tests/rollup_benchmarks: libquids_common.dylib
-tests/rollup_benchmarks: /usr/local/lib/libfmt.a
-tests/rollup_benchmarks: /usr/local/lib/libgtest_main.a
-tests/rollup_benchmarks: /usr/local/lib/libgtest.a
-tests/rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Volumes/BIGCODE/quids-evm-cpp/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable rollup_benchmarks"
-	cd /Volumes/BIGCODE/quids-evm-cpp/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/rollup_benchmarks.dir/link.txt --verbose=$(VERBOSE)
+bin/rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o
+bin/rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/build.make
+bin/rollup_benchmarks: lib/libquids.dylib
+bin/rollup_benchmarks: /usr/local/lib/libfmt.a
+bin/rollup_benchmarks: /usr/local/Cellar/openssl@3/3.4.1/lib/libcrypto.dylib
+bin/rollup_benchmarks: /usr/local/Cellar/openssl@3/3.4.1/lib/libssl.dylib
+bin/rollup_benchmarks: lib/librollup.a
+bin/rollup_benchmarks: lib/libneural.a
+bin/rollup_benchmarks: lib/libzkp.a
+bin/rollup_benchmarks: /usr/local/lib/libgmp.dylib
+bin/rollup_benchmarks: lib/libevm.a
+bin/rollup_benchmarks: lib/libstorage.a
+bin/rollup_benchmarks: /usr/local/lib/librocksdb.dylib
+bin/rollup_benchmarks: /usr/local/lib/libzstd.dylib
+bin/rollup_benchmarks: lib/libquids_cli.dylib
+bin/rollup_benchmarks: lib/libquids_control.dylib
+bin/rollup_benchmarks: lib/libblockchain.dylib
+bin/rollup_benchmarks: lib/libcrypto.a
+bin/rollup_benchmarks: lib/libquantum.a
+bin/rollup_benchmarks: /usr/local/lib/libblake3.dylib
+bin/rollup_benchmarks: /usr/local/lib/libspdlog.1.15.1.dylib
+bin/rollup_benchmarks: /usr/local/lib/libfmt.a
+bin/rollup_benchmarks: /usr/local/lib/libgtest_main.a
+bin/rollup_benchmarks: /usr/local/lib/libgtest.a
+bin/rollup_benchmarks: /usr/local/Cellar/openssl@3/3.4.1/lib/libcrypto.dylib
+bin/rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Volumes/DockerStuff/GITHUB/quids/QUIDS/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../bin/rollup_benchmarks"
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/rollup_benchmarks.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-tests/CMakeFiles/rollup_benchmarks.dir/build: tests/rollup_benchmarks
+tests/CMakeFiles/rollup_benchmarks.dir/build: bin/rollup_benchmarks
 .PHONY : tests/CMakeFiles/rollup_benchmarks.dir/build
 
 tests/CMakeFiles/rollup_benchmarks.dir/clean:
-	cd /Volumes/BIGCODE/quids-evm-cpp/tests && $(CMAKE_COMMAND) -P CMakeFiles/rollup_benchmarks.dir/cmake_clean.cmake
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests && $(CMAKE_COMMAND) -P CMakeFiles/rollup_benchmarks.dir/cmake_clean.cmake
 .PHONY : tests/CMakeFiles/rollup_benchmarks.dir/clean
 
 tests/CMakeFiles/rollup_benchmarks.dir/depend:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Volumes/BIGCODE/quids-evm-cpp /Volumes/BIGCODE/quids-evm-cpp/tests /Volumes/BIGCODE/quids-evm-cpp /Volumes/BIGCODE/quids-evm-cpp/tests /Volumes/BIGCODE/quids-evm-cpp/tests/CMakeFiles/rollup_benchmarks.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Volumes/DockerStuff/GITHUB/quids/QUIDS /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests /Volumes/DockerStuff/GITHUB/quids/QUIDS /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests/CMakeFiles/rollup_benchmarks.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : tests/CMakeFiles/rollup_benchmarks.dir/depend
 

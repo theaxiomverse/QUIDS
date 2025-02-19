@@ -7,7 +7,6 @@
  * @author QUIDS Team
  */
 
-#include "StdNamespace.hpp"
 #include "QuantumState.hpp"
 #include "QuantumProof.hpp"
 #include <vector>
@@ -15,6 +14,10 @@
 #include <string>
 #include <array>
 #include <cstdint>
+#include <cstddef>
+#include <random>
+#include <algorithm>
+#include <chrono>
 #include "QKD.hpp"
 
 
@@ -36,7 +39,7 @@ enum class SignatureScheme {
  * @brief Structure containing quantum key data and properties
  */
 struct QuantumKey {
-    vector<uint8_t> key_material;
+    std::vector<uint8_t> key_material;
     QuantumState entangled_state{1};  // Initialize with 1 qubit
     double security_parameter{0.0};
     size_t effective_length{0};
@@ -52,7 +55,7 @@ struct QuantumKey {
  * @brief Structure containing quantum signature data and metadata
  */
 struct QuantumSignature {
-        vector<uint8_t> sig_data;  ///< Raw signature data
+        std::vector<uint8_t> sig_data;  ///< Raw signature data
     SignatureScheme scheme;         ///< Signature scheme used
     double fidelity;               ///< Quantum state 
     double proof_fidelity;         ///< Proof 
@@ -63,7 +66,7 @@ struct QuantumSignature {
  * @brief Parameters for quantum encryption operations
  */
 struct QuantumEncryptionParams {
-    size_t key_size{256};                              ///< Key size in bits
+    std::size_t key_size{256};                              ///< Key size in bits
     bool use_entanglement{true};                       ///< Whether to use quantum entanglement
     double error_rate{0.01};                           ///< Acceptable quantum error rate
     SignatureScheme sig_scheme{SignatureScheme::DILITHIUM}; ///< Default signature scheme
@@ -102,7 +105,7 @@ public:
 
     // Delete copy/move constructors
     QuantumCrypto(const QuantumCrypto&) = delete;
-    QuantumCrypto(const QuantumEncryptionParams& params);
+    explicit QuantumCrypto(const QuantumEncryptionParams& params);
     QuantumCrypto& operator=(const QuantumCrypto&) = delete;
     QuantumCrypto(QuantumCrypto&&) = delete;
     QuantumCrypto& operator=(QuantumCrypto&&) = delete;
@@ -119,13 +122,16 @@ public:
      * @return Vector containing the generated seed material
      */
     std::vector<uint8_t> generateSeed();
+
+    void hashInto(const std::vector<uint8_t>& data, const std::vector<uint8_t>& output) const noexcept;
+    const std::vector<uint8_t>& hash(const std::vector<uint8_t>& data) const noexcept;
     
     /**
      * @brief Compute a hybrid quantum-classical hash of input data
      * @param data Input data to be hashed
      * @return Vector containing the computed hash value
      */
-    std::vector<uint8_t> hashData(const std::vector<uint8_t>& data);
+    std::vector<uint8_t> hashData(const std::vector<uint8_t>& data) const;
     
     /**
      * @brief Generate a new quantum cryptographic key

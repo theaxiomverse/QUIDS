@@ -13,7 +13,8 @@ public:
     ~QuantumHashFunction();
     
     // Hash data using quantum-resistant algorithm
-    std::vector<uint8_t> hash(const std::vector<uint8_t>& data);
+    [[nodiscard]] std::vector<uint8_t> hash(const std::vector<uint8_t>& data) const noexcept;
+   void hashInto(const std::vector<uint8_t>& data, const std::vector<uint8_t>& output) const noexcept;
     
 private:
     class Impl;

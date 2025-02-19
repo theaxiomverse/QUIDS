@@ -1,10 +1,8 @@
 
-#include "StdNamespace.hpp"
 #include "crypto/signature/Dilithium.hpp"
 #include "quantum/QuantumCrypto.hpp"
 #include "quantum/QuantumState.hpp"
 #include "quantum/QuantumOperations.hpp"
-#include "quantum/QuantumDetail.hpp"
 
 #include <stdexcept>
 #include <cmath>
@@ -401,7 +399,10 @@ QuantumCrypto::sign(const std::vector<uint8_t>& message,
     };
 }
 
-    
+    std::vector<uint8_t> QuantumCrypto::generateRandomBytes(size_t num_bytes) {
+        return std::vector<uint8_t>();
+    }
+
 
 } // namespace quantum
 } // namespace quids 

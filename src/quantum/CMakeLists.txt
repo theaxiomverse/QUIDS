@@ -22,4 +22,5 @@ target_link_libraries(quantum
 target_include_directories(quantum
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+        "/usr/local/Cellar/eigen/3.4.0_1/include/eigen3"
 )

@@ -13,6 +13,8 @@ target_link_libraries(zkp
 target_include_directories(zkp
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/vendors/includes>
+        "/usr/local/Cellar/blake3/1.5.5/include"
     $<INSTALL_INTERFACE:include>
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}

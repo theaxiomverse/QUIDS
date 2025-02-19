@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
+  "../bin/rollup_benchmarks"
+  "../bin/rollup_benchmarks.pdb"
   "CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o"
   "CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o.d"
-  "rollup_benchmarks"
-  "rollup_benchmarks.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

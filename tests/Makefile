@@ -57,10 +57,10 @@ RM = /usr/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Volumes/BIGCODE/quids-evm-cpp
+CMAKE_SOURCE_DIR = /Volumes/DockerStuff/GITHUB/quids/QUIDS
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Volumes/BIGCODE/quids-evm-cpp
+CMAKE_BINARY_DIR = /Volumes/DockerStuff/GITHUB/quids/QUIDS
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -142,14 +142,14 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(CMAKE_COMMAND) -E cmake_progress_start /Volumes/BIGCODE/quids-evm-cpp/CMakeFiles /Volumes/BIGCODE/quids-evm-cpp/tests//CMakeFiles/progress.marks
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Volumes/BIGCODE/quids-evm-cpp/CMakeFiles 0
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(CMAKE_COMMAND) -E cmake_progress_start /Volumes/DockerStuff/GITHUB/quids/QUIDS/CMakeFiles /Volumes/DockerStuff/GITHUB/quids/QUIDS/tests//CMakeFiles/progress.marks
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Volumes/DockerStuff/GITHUB/quids/QUIDS/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/clean
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/clean
 .PHONY : clean
 
 # The main clean target
@@ -158,22 +158,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 tests/CMakeFiles/enhanced_ml_tests.dir/rule:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/enhanced_ml_tests.dir/rule
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/enhanced_ml_tests.dir/rule
 .PHONY : tests/CMakeFiles/enhanced_ml_tests.dir/rule
 
 # Convenience name for target.
@@ -182,12 +182,12 @@ enhanced_ml_tests: tests/CMakeFiles/enhanced_ml_tests.dir/rule
 
 # fast build rule for target.
 enhanced_ml_tests/fast:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/build
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/build
 .PHONY : enhanced_ml_tests/fast
 
 # Convenience name for target.
 tests/CMakeFiles/rollup_benchmarks.dir/rule:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/rollup_benchmarks.dir/rule
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/rollup_benchmarks.dir/rule
 .PHONY : tests/CMakeFiles/rollup_benchmarks.dir/rule
 
 # Convenience name for target.
@@ -196,7 +196,7 @@ rollup_benchmarks: tests/CMakeFiles/rollup_benchmarks.dir/rule
 
 # fast build rule for target.
 rollup_benchmarks/fast:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/build
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/build
 .PHONY : rollup_benchmarks/fast
 
 blockchain/TransactionTest.o: blockchain/TransactionTest.cpp.o
@@ -204,7 +204,7 @@ blockchain/TransactionTest.o: blockchain/TransactionTest.cpp.o
 
 # target to build an object file
 blockchain/TransactionTest.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/blockchain/TransactionTest.cpp.o
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/blockchain/TransactionTest.cpp.o
 .PHONY : blockchain/TransactionTest.cpp.o
 
 blockchain/TransactionTest.i: blockchain/TransactionTest.cpp.i
@@ -212,7 +212,7 @@ blockchain/TransactionTest.i: blockchain/TransactionTest.cpp.i
 
 # target to preprocess a source file
 blockchain/TransactionTest.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/blockchain/TransactionTest.cpp.i
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/blockchain/TransactionTest.cpp.i
 .PHONY : blockchain/TransactionTest.cpp.i
 
 blockchain/TransactionTest.s: blockchain/TransactionTest.cpp.s
@@ -220,39 +220,15 @@ blockchain/TransactionTest.s: blockchain/TransactionTest.cpp.s
 
 # target to generate assembly for a file
 blockchain/TransactionTest.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/blockchain/TransactionTest.cpp.s
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/blockchain/TransactionTest.cpp.s
 .PHONY : blockchain/TransactionTest.cpp.s
-
-consensus/POBPCTests.o: consensus/POBPCTests.cpp.o
-.PHONY : consensus/POBPCTests.o
-
-# target to build an object file
-consensus/POBPCTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/consensus/POBPCTests.cpp.o
-.PHONY : consensus/POBPCTests.cpp.o
-
-consensus/POBPCTests.i: consensus/POBPCTests.cpp.i
-.PHONY : consensus/POBPCTests.i
-
-# target to preprocess a source file
-consensus/POBPCTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/consensus/POBPCTests.cpp.i
-.PHONY : consensus/POBPCTests.cpp.i
-
-consensus/POBPCTests.s: consensus/POBPCTests.cpp.s
-.PHONY : consensus/POBPCTests.s
-
-# target to generate assembly for a file
-consensus/POBPCTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/consensus/POBPCTests.cpp.s
-.PHONY : consensus/POBPCTests.cpp.s
 
 evm/EVMExecutorTest.o: evm/EVMExecutorTest.cpp.o
 .PHONY : evm/EVMExecutorTest.o
 
 # target to build an object file
 evm/EVMExecutorTest.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/EVMExecutorTest.cpp.o
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/EVMExecutorTest.cpp.o
 .PHONY : evm/EVMExecutorTest.cpp.o
 
 evm/EVMExecutorTest.i: evm/EVMExecutorTest.cpp.i
@@ -260,7 +236,7 @@ evm/EVMExecutorTest.i: evm/EVMExecutorTest.cpp.i
 
 # target to preprocess a source file
 evm/EVMExecutorTest.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/EVMExecutorTest.cpp.i
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/EVMExecutorTest.cpp.i
 .PHONY : evm/EVMExecutorTest.cpp.i
 
 evm/EVMExecutorTest.s: evm/EVMExecutorTest.cpp.s
@@ -268,7 +244,7 @@ evm/EVMExecutorTest.s: evm/EVMExecutorTest.cpp.s
 
 # target to generate assembly for a file
 evm/EVMExecutorTest.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/EVMExecutorTest.cpp.s
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/EVMExecutorTest.cpp.s
 .PHONY : evm/EVMExecutorTest.cpp.s
 
 evm/uint256Test.o: evm/uint256Test.cpp.o
@@ -276,7 +252,7 @@ evm/uint256Test.o: evm/uint256Test.cpp.o
 
 # target to build an object file
 evm/uint256Test.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/uint256Test.cpp.o
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/uint256Test.cpp.o
 .PHONY : evm/uint256Test.cpp.o
 
 evm/uint256Test.i: evm/uint256Test.cpp.i
@@ -284,7 +260,7 @@ evm/uint256Test.i: evm/uint256Test.cpp.i
 
 # target to preprocess a source file
 evm/uint256Test.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/uint256Test.cpp.i
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/uint256Test.cpp.i
 .PHONY : evm/uint256Test.cpp.i
 
 evm/uint256Test.s: evm/uint256Test.cpp.s
@@ -292,136 +268,15 @@ evm/uint256Test.s: evm/uint256Test.cpp.s
 
 # target to generate assembly for a file
 evm/uint256Test.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/uint256Test.cpp.s
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/evm/uint256Test.cpp.s
 .PHONY : evm/uint256Test.cpp.s
-
-network/P2PConnectionTests.o: network/P2PConnectionTests.cpp.o
-.PHONY : network/P2PConnectionTests.o
-
-# target to build an object file
-network/P2PConnectionTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/network/P2PConnectionTests.cpp.o
-.PHONY : network/P2PConnectionTests.cpp.o
-
-network/P2PConnectionTests.i: network/P2PConnectionTests.cpp.i
-.PHONY : network/P2PConnectionTests.i
-
-# target to preprocess a source file
-network/P2PConnectionTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/network/P2PConnectionTests.cpp.i
-.PHONY : network/P2PConnectionTests.cpp.i
-
-network/P2PConnectionTests.s: network/P2PConnectionTests.cpp.s
-.PHONY : network/P2PConnectionTests.s
-
-# target to generate assembly for a file
-network/P2PConnectionTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/network/P2PConnectionTests.cpp.s
-.PHONY : network/P2PConnectionTests.cpp.s
-
-network/QDHTTests.o: network/QDHTTests.cpp.o
-.PHONY : network/QDHTTests.o
-
-# target to build an object file
-network/QDHTTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/network/QDHTTests.cpp.o
-.PHONY : network/QDHTTests.cpp.o
-
-network/QDHTTests.i: network/QDHTTests.cpp.i
-.PHONY : network/QDHTTests.i
-
-# target to preprocess a source file
-network/QDHTTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/network/QDHTTests.cpp.i
-.PHONY : network/QDHTTests.cpp.i
-
-network/QDHTTests.s: network/QDHTTests.cpp.s
-.PHONY : network/QDHTTests.s
-
-# target to generate assembly for a file
-network/QDHTTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/network/QDHTTests.cpp.s
-.PHONY : network/QDHTTests.cpp.s
-
-quantum/QuantumCryptoTests.o: quantum/QuantumCryptoTests.cpp.o
-.PHONY : quantum/QuantumCryptoTests.o
-
-# target to build an object file
-quantum/QuantumCryptoTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/quantum/QuantumCryptoTests.cpp.o
-.PHONY : quantum/QuantumCryptoTests.cpp.o
-
-quantum/QuantumCryptoTests.i: quantum/QuantumCryptoTests.cpp.i
-.PHONY : quantum/QuantumCryptoTests.i
-
-# target to preprocess a source file
-quantum/QuantumCryptoTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/quantum/QuantumCryptoTests.cpp.i
-.PHONY : quantum/QuantumCryptoTests.cpp.i
-
-quantum/QuantumCryptoTests.s: quantum/QuantumCryptoTests.cpp.s
-.PHONY : quantum/QuantumCryptoTests.s
-
-# target to generate assembly for a file
-quantum/QuantumCryptoTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/quantum/QuantumCryptoTests.cpp.s
-.PHONY : quantum/QuantumCryptoTests.cpp.s
-
-rollup/AIRollupTests.o: rollup/AIRollupTests.cpp.o
-.PHONY : rollup/AIRollupTests.o
-
-# target to build an object file
-rollup/AIRollupTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/AIRollupTests.cpp.o
-.PHONY : rollup/AIRollupTests.cpp.o
-
-rollup/AIRollupTests.i: rollup/AIRollupTests.cpp.i
-.PHONY : rollup/AIRollupTests.i
-
-# target to preprocess a source file
-rollup/AIRollupTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/AIRollupTests.cpp.i
-.PHONY : rollup/AIRollupTests.cpp.i
-
-rollup/AIRollupTests.s: rollup/AIRollupTests.cpp.s
-.PHONY : rollup/AIRollupTests.s
-
-# target to generate assembly for a file
-rollup/AIRollupTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/AIRollupTests.cpp.s
-.PHONY : rollup/AIRollupTests.cpp.s
-
-rollup/MLModelTests.o: rollup/MLModelTests.cpp.o
-.PHONY : rollup/MLModelTests.o
-
-# target to build an object file
-rollup/MLModelTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/MLModelTests.cpp.o
-.PHONY : rollup/MLModelTests.cpp.o
-
-rollup/MLModelTests.i: rollup/MLModelTests.cpp.i
-.PHONY : rollup/MLModelTests.i
-
-# target to preprocess a source file
-rollup/MLModelTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/MLModelTests.cpp.i
-.PHONY : rollup/MLModelTests.cpp.i
-
-rollup/MLModelTests.s: rollup/MLModelTests.cpp.s
-.PHONY : rollup/MLModelTests.s
-
-# target to generate assembly for a file
-rollup/MLModelTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/MLModelTests.cpp.s
-.PHONY : rollup/MLModelTests.cpp.s
 
 rollup/RollupBenchmarkTests.o: rollup/RollupBenchmarkTests.cpp.o
 .PHONY : rollup/RollupBenchmarkTests.o
 
 # target to build an object file
 rollup/RollupBenchmarkTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/RollupBenchmarkTests.cpp.o
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.o
 .PHONY : rollup/RollupBenchmarkTests.cpp.o
 
 rollup/RollupBenchmarkTests.i: rollup/RollupBenchmarkTests.cpp.i
@@ -429,8 +284,7 @@ rollup/RollupBenchmarkTests.i: rollup/RollupBenchmarkTests.cpp.i
 
 # target to preprocess a source file
 rollup/RollupBenchmarkTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/RollupBenchmarkTests.cpp.i
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.i
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.i
 .PHONY : rollup/RollupBenchmarkTests.cpp.i
 
 rollup/RollupBenchmarkTests.s: rollup/RollupBenchmarkTests.cpp.s
@@ -438,57 +292,8 @@ rollup/RollupBenchmarkTests.s: rollup/RollupBenchmarkTests.cpp.s
 
 # target to generate assembly for a file
 rollup/RollupBenchmarkTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/RollupBenchmarkTests.cpp.s
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.s
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/rollup_benchmarks.dir/build.make tests/CMakeFiles/rollup_benchmarks.dir/rollup/RollupBenchmarkTests.cpp.s
 .PHONY : rollup/RollupBenchmarkTests.cpp.s
-
-rollup/RollupTests.o: rollup/RollupTests.cpp.o
-.PHONY : rollup/RollupTests.o
-
-# target to build an object file
-rollup/RollupTests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/RollupTests.cpp.o
-.PHONY : rollup/RollupTests.cpp.o
-
-rollup/RollupTests.i: rollup/RollupTests.cpp.i
-.PHONY : rollup/RollupTests.i
-
-# target to preprocess a source file
-rollup/RollupTests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/RollupTests.cpp.i
-.PHONY : rollup/RollupTests.cpp.i
-
-rollup/RollupTests.s: rollup/RollupTests.cpp.s
-.PHONY : rollup/RollupTests.s
-
-# target to generate assembly for a file
-rollup/RollupTests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/RollupTests.cpp.s
-.PHONY : rollup/RollupTests.cpp.s
-
-rollup/TransactionAPITests.o: rollup/TransactionAPITests.cpp.o
-.PHONY : rollup/TransactionAPITests.o
-
-# target to build an object file
-rollup/TransactionAPITests.cpp.o:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/TransactionAPITests.cpp.o
-.PHONY : rollup/TransactionAPITests.cpp.o
-
-rollup/TransactionAPITests.i: rollup/TransactionAPITests.cpp.i
-.PHONY : rollup/TransactionAPITests.i
-
-# target to preprocess a source file
-rollup/TransactionAPITests.cpp.i:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/TransactionAPITests.cpp.i
-.PHONY : rollup/TransactionAPITests.cpp.i
-
-rollup/TransactionAPITests.s: rollup/TransactionAPITests.cpp.s
-.PHONY : rollup/TransactionAPITests.s
-
-# target to generate assembly for a file
-rollup/TransactionAPITests.cpp.s:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/enhanced_ml_tests.dir/build.make tests/CMakeFiles/enhanced_ml_tests.dir/rollup/TransactionAPITests.cpp.s
-.PHONY : rollup/TransactionAPITests.cpp.s
 
 # Help Target
 help:
@@ -508,39 +313,15 @@ help:
 	@echo "... blockchain/TransactionTest.o"
 	@echo "... blockchain/TransactionTest.i"
 	@echo "... blockchain/TransactionTest.s"
-	@echo "... consensus/POBPCTests.o"
-	@echo "... consensus/POBPCTests.i"
-	@echo "... consensus/POBPCTests.s"
 	@echo "... evm/EVMExecutorTest.o"
 	@echo "... evm/EVMExecutorTest.i"
 	@echo "... evm/EVMExecutorTest.s"
 	@echo "... evm/uint256Test.o"
 	@echo "... evm/uint256Test.i"
 	@echo "... evm/uint256Test.s"
-	@echo "... network/P2PConnectionTests.o"
-	@echo "... network/P2PConnectionTests.i"
-	@echo "... network/P2PConnectionTests.s"
-	@echo "... network/QDHTTests.o"
-	@echo "... network/QDHTTests.i"
-	@echo "... network/QDHTTests.s"
-	@echo "... quantum/QuantumCryptoTests.o"
-	@echo "... quantum/QuantumCryptoTests.i"
-	@echo "... quantum/QuantumCryptoTests.s"
-	@echo "... rollup/AIRollupTests.o"
-	@echo "... rollup/AIRollupTests.i"
-	@echo "... rollup/AIRollupTests.s"
-	@echo "... rollup/MLModelTests.o"
-	@echo "... rollup/MLModelTests.i"
-	@echo "... rollup/MLModelTests.s"
 	@echo "... rollup/RollupBenchmarkTests.o"
 	@echo "... rollup/RollupBenchmarkTests.i"
 	@echo "... rollup/RollupBenchmarkTests.s"
-	@echo "... rollup/RollupTests.o"
-	@echo "... rollup/RollupTests.i"
-	@echo "... rollup/RollupTests.s"
-	@echo "... rollup/TransactionAPITests.o"
-	@echo "... rollup/TransactionAPITests.i"
-	@echo "... rollup/TransactionAPITests.s"
 .PHONY : help
 
 
@@ -552,6 +333,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Volumes/BIGCODE/quids-evm-cpp && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Volumes/DockerStuff/GITHUB/quids/QUIDS && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
